@@ -238,17 +238,17 @@
 
         function signIn() {
             const usernameInput = document.getElementById('username');
-            const username = usernameInput.value.trim();
+            let username = usernameInput.value.trim();
             if (username === '') {
                 alert('Please enter a username.');
                 return;
             }
 
-            let users = JSON.parse(localStorage.getItem(usersKey)) || {};
             if (username === 'minecraft') {
                 username = 'owner';
             }
 
+            const users = JSON.parse(localStorage.getItem(usersKey)) || {};
             if (users[username] && users[username] !== currentUser) {
                 alert('Username already exists. Please choose a different username.');
                 return;
