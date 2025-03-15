@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Serverr</title>
+    <title>Minecraft Server</title>
     <!-- Firebase scripts -->
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
@@ -367,10 +367,12 @@
                 timestamp: new Date().toISOString(),
                 text: formText,
                 replies: []
+            }).then(() => {
+                formInput.value = '';
+                loadForums();
+            }).catch(error => {
+                console.error('Error submitting form:', error);
             });
-
-            formInput.value = '';
-            loadForums();
         }
 
         function submitReply(button) {
@@ -393,10 +395,12 @@
                 username: currentUser,
                 timestamp: new Date().toISOString(),
                 text: replyText
+            }).then(() => {
+                replyInput.value = '';
+                loadForums();
+            }).catch(error => {
+                console.error('Error submitting reply:', error);
             });
-
-            replyInput.value = '';
-            loadForums();
         }
 
         function submitRule() {
@@ -417,10 +421,12 @@
                 username: 'Owner',
                 timestamp: new Date().toISOString(),
                 text: ruleText
+            }).then(() => {
+                ruleInput.value = '';
+                loadRules();
+            }).catch(error => {
+                console.error('Error submitting rule:', error);
             });
-
-            ruleInput.value = '';
-            loadRules();
         }
 
         function loadForums() {
@@ -479,8 +485,11 @@
                 return;
             }
 
-            firebase.database().ref(`${forumsKey}/${index}`).remove();
-            loadForums();
+            firebase.database().ref(`${forumsKey}/${index}`).remove().then(() => {
+                loadForums();
+            }).catch(error => {
+                console.error('Error deleting form:', error);
+            });
         }
 
         function deleteRule(index) {
@@ -489,8 +498,11 @@
                 return;
             }
 
-            firebase.database().ref(`${rulesKey}/${index}`).remove();
-            loadRules();
+            firebase.database().ref(`${rulesKey}/${index}`).remove().then(() => {
+                loadRules();
+            }).catch(error => {
+                console.error('Error deleting rule:', error);
+            });
         }
 
         function loadUser() {
@@ -504,19 +516,4 @@
             const rulesContainer = document.getElementById('rules-container');
 
             if (currentUser) {
-                signInButton.classList.add('hidden');
-                logoutButton.classList.remove('hidden');
-                if (currentUser === '111222999owner') {
-                    rulesContainer.classList.remove('hidden');
-                } else {
-                    rulesContainer.classList.add('hidden');
-                }
-            } else {
-                signInButton.classList.remove('hidden');
-                logoutButton.classList.add('hidden');
-                rulesContainer.classList.add('hidden');
-            }
-        }
-    </script>
-</body>
-</html>
+                signInButton.class
