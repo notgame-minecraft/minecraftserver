@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server!!</title>
+    <title>Minecraft Server</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -149,14 +149,51 @@
         .hidden {
             display: none;
         }
+        #account-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        #account-modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: left;
+        }
+        #account-modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        #account-modal-content button {
+            width: 100%;
+            padding: 10px;
+            background: #2c3e50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        #account-modal-content button:hover {
+            background: #e74c3c;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Welcome to the Minecraft Server</h1>
         <div class="auth-buttons">
-            <button id="sign-in-toggle" onclick="toggleSignInForm()">Sign In</button>
-            <button id="logout-button" class="hidden" onclick="logout()">Logout</button>
+            <button onclick="toggleAccountModal()">Account</button>
         </div>
     </header>
     <nav>
@@ -207,33 +244,36 @@
                 <!-- Rules will be displayed here -->
             </div>
         </section>
-        <section id="sign-in-form" class="hidden">
-            <h2>Sign In</h2>
-            <input type="text" id="username" name="username" placeholder="Enter your username">
-            <button onclick="signIn()">Sign In</button>
-        </section>
     </main>
     <footer>
         <p>&copy; 2025 Minecraft Server. All rights reserved.</p>
     </footer>
+
+    <div id="account-modal">
+        <div id="account-modal-content">
+            <span onclick="toggleAccountModal()" style="float:right;cursor:pointer;">&times;</span>
+            <h2>Account</h2>
+            <input type="text" id="username" placeholder="Enter your username">
+            <button id="sign-in-button" onclick="signIn()">Sign In</button>
+            <button id="logout-button" class="hidden" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
     <script>
         let currentUser = null;
         const formsKey = 'forms';
         const rulesKey = 'rules';
-        const usersKey = 'users';
         const currentUserKey = 'currentUser';
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadForms();
-            loadRules();
             loadUser();
             updateAuthUI();
             showSection('home'); // Show home section by default
         });
 
-        function toggleSignInForm() {
-            const signInForm = document.getElementById('sign-in-form');
-            signInForm.classList.toggle('hidden');
+        function toggleAccountModal() {
+            const accountModal = document.getElementById('account-modal');
+            accountModal.style.display = accountModal.style.display === 'block' ? 'none' : 'block';
         }
 
         function signIn() {
@@ -248,26 +288,19 @@
                 username = 'owner';
             }
 
-            const users = JSON.parse(localStorage.getItem(usersKey)) || {};
-            if (users[username] && users[username] !== currentUser) {
-                alert('Username already exists. Please choose a different username.');
-                return;
-            }
-
             currentUser = username;
-            users[currentUser] = new Date().toISOString();
-            localStorage.setItem(usersKey, JSON.stringify(users));
             localStorage.setItem(currentUserKey, currentUser);
 
             alert(`Signed in as ${currentUser}`);
             updateAuthUI();
-            toggleSignInForm(); // Hide the sign-in form after signing in
+            toggleAccountModal(); // Hide the account modal after signing in
         }
 
         function logout() {
-            currentUser = null;
             localStorage.removeItem(currentUserKey);
+            currentUser = null;
             updateAuthUI();
+            toggleAccountModal(); // Hide the account modal after logging out
         }
 
         function showSection(sectionId) {
@@ -278,183 +311,19 @@
             document.getElementById(sectionId).classList.add('active');
         }
 
-        function submitForm() {
-            if (!currentUser) {
-                alert('Please sign in first.');
-                return;
-            }
-
-            const formInput = document.getElementById('form-input');
-            const formText = formInput.value.trim();
-            if (formText === '') {
-                alert('Please enter a form topic.');
-                return;
-            }
-
-            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
-            forms.push({
-                username: currentUser,
-                timestamp: new Date().toISOString(),
-                text: formText,
-                replies: []
-            });
-            localStorage.setItem(formsKey, JSON.stringify(forms));
-
-            formInput.value = '';
-            loadForms();
-        }
-
-        function submitReply(button) {
-            if (!currentUser) {
-                alert('Please sign in first.');
-                return;
-            }
-
-            const replyContainer = button.parentElement;
-            const replyInput = replyContainer.querySelector('textarea');
-            const replyText = replyInput.value.trim();
-            if (replyText === '') {
-                alert('Please enter a reply.');
-                return;
-            }
-
-            const formIndex = replyContainer.dataset.formIndex;
-            const forms = JSON.parse(localStorage.getItem(formsKey));
-            forms[formIndex].replies.push({
-                username: currentUser,
-                timestamp: new Date().toISOString(),
-                text: replyText
-            });
-            localStorage.setItem(formsKey, JSON.stringify(forms));
-
-            replyInput.value = '';
-            loadForms();
-        }
-
-        function submitRule() {
-            if (currentUser !== 'owner') {
-                alert('Only the owner can add rules.');
-                return;
-            }
-
-            const ruleInput = document.getElementById('rule-input');
-            const ruleText = ruleInput.value.trim();
-            if (ruleText === '') {
-                alert('Please enter a rule.');
-                return;
-            }
-
-            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
-            rules.push({
-                username: currentUser,
-                timestamp: new Date().toISOString(),
-                text: ruleText
-            });
-            localStorage.setItem(rulesKey, JSON.stringify(rules));
-
-            ruleInput.value = '';
-            loadRules();
-        }
-
-        function loadForms() {
-            const formsContainer = document.getElementById('forms-container');
-            formsContainer.innerHTML = '';
-            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
-
-            forms.forEach((form, index) => {
-                const formElement = document.createElement('div');
-                formElement.className = 'form';
-                formElement.innerHTML = `
-                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${form.username}</div>
-                    <div>${form.text}</div>
-                    <div class="reply-container" data-form-index="${index}">
-                        <textarea placeholder="Enter your reply here..." name="reply-text"></textarea>
-                        <button onclick="submitReply(this)">Reply</button>
-                    </div>
-                    <div class="messages">
-                        ${form.replies.map(reply => `
-                            <div class="message">
-                                <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username}</div>
-                                <div>${reply.text}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                formsContainer.appendChild(formElement);
-            });
-
-            // Clean up old forms
-            const oneMonthAgo = new Date();
-            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-            const updatedForms = forms.filter(form => new Date(form.timestamp) > oneMonthAgo);
-            localStorage.setItem(formsKey, JSON.stringify(updatedForms));
-        }
-
-        function loadRules() {
-            const rulesContainer = document.getElementById('rules-content');
-            rulesContainer.innerHTML = '';
-            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
-
-            rules.forEach((rule, index) => {
-                const ruleElement = document.createElement('div');
-                ruleElement.className = 'rule';
-                ruleElement.innerHTML = `
-                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${rule.username}</div>
-                    <div>${rule.text}</div>
-                    ${currentUser === 'owner' ? `<button onclick="deleteRule(${index})">Delete</button>` : ''}
-                `;
-                rulesContainer.appendChild(ruleElement);
-            });
-
-            // Clean up old rules
-            const oneMonthAgo = new Date();
-            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-            const updatedRules = rules.filter(rule => new Date(rule.timestamp) > oneMonthAgo);
-            localStorage.setItem(rulesKey, JSON.stringify(updatedRules));
-        }
-
-        function deleteRule(index) {
-            if (currentUser !== 'owner') {
-                alert('Only the owner can delete rules.');
-                return;
-            }
-
-            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
-            rules.splice(index, 1);
-            localStorage.setItem(rulesKey, JSON.stringify(rules));
-
-            loadRules();
-        }
-
         function loadUser() {
-            const users = JSON.parse(localStorage.getItem(usersKey)) || {};
-            const oneMonthAgo = new Date();
-            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-            // Remove inactive users
-            for (const [username, lastActive] of Object.entries(users)) {
-                if (new Date(lastActive) < oneMonthAgo) {
-                    delete users[username];
-                }
-            }
-            localStorage.setItem(usersKey, JSON.stringify(users));
-
-            // Restore current user from localStorage
             currentUser = localStorage.getItem(currentUserKey);
-            updateAuthUI();
         }
 
         function updateAuthUI() {
-            const signInToggle = document.getElementById('sign-in-toggle');
+            const signInButton = document.getElementById('sign-in-button');
             const logoutButton = document.getElementById('logout-button');
-            const signInForm = document.getElementById('sign-in-form');
             const deleteButton = document.getElementById('delete-all-forms');
             const rulesContainer = document.getElementById('rules-container');
 
             if (currentUser) {
-                signInToggle.classList.add('hidden');
+                signInButton.classList.add('hidden');
                 logoutButton.classList.remove('hidden');
-                signInForm.classList.add('hidden');
                 if (currentUser === 'owner') {
                     deleteButton.classList.remove('hidden');
                     rulesContainer.classList.remove('hidden');
@@ -463,9 +332,8 @@
                     rulesContainer.classList.add('hidden');
                 }
             } else {
-                signInToggle.classList.remove('hidden');
+                signInButton.classList.remove('hidden');
                 logoutButton.classList.add('hidden');
-                signInForm.classList.add('hidden');
                 deleteButton.classList.add('hidden');
                 rulesContainer.classList.add('hidden');
             }
