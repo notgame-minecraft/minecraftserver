@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server!</title>
+    <title>Minecraft Server</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -76,8 +76,26 @@
         main {
             flex: 1;
         }
-        .hidden {
+        section {
             display: none;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            margin: 20px auto;
+            width: 80%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        section.active {
+            display: block;
+        }
+        footer {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            margin-top: auto;
+            color: #95a5a6; /* Light gray color */
         }
         .form-container, .reply-container, .rules-container {
             margin: 20px 0;
@@ -140,16 +158,16 @@
     </header>
     <nav>
         <ul>
-            <li><a href="#home">Home!</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#updates">Updates</a></li>
-            <li><a href="#staff">Staff</a></li>
-            <li><a href="#forms">Forms</a></li>
-            <li><a href="#rules">Rules</a></li>
+            <li><a href="#home" onclick="showSection('home')">Home</a></li>
+            <li><a href="#about" onclick="showSection('about')">About</a></li>
+            <li><a href="#updates" onclick="showSection('updates')">Updates</a></li>
+            <li><a href="#staff" onclick="showSection('staff')">Staff</a></li>
+            <li><a href="#forms" onclick="showSection('forms')">Forms</a></li>
+            <li><a href="#rules" onclick="showSection('rules')">Rules</a></li>
         </ul>
     </nav>
     <main>
-        <section id="home">
+        <section id="home" class="active">
             <h2>Home</h2>
             <p>Welcome to our Minecraft server. Enjoy your stay!</p>
         </section>
@@ -207,6 +225,7 @@
             loadRules();
             loadUser();
             updateAuthUI();
+            showSection('home'); // Show home section by default
         });
 
         function toggleSignInForm() {
@@ -222,7 +241,11 @@
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem(usersKey)) || {};
+            let users = JSON.parse(localStorage.getItem(usersKey)) || {};
+            if (username === 'minecraft') {
+                username = 'owner';
+            }
+
             if (users[username] && users[username] !== currentUser) {
                 alert('Username already exists. Please choose a different username.');
                 return;
@@ -242,6 +265,14 @@
             currentUser = null;
             localStorage.removeItem(currentUserKey);
             updateAuthUI();
+        }
+
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
         }
 
         function submitForm() {
