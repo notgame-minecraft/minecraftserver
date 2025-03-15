@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Server</title>
+    <style>
+        /* Basic styles for navigation and sections */
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+
+        section {
+            display: none;
+        }
+
+        section:target {
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -13,9 +33,8 @@
         <ul>
             <li><a href="#home">Home</a></li>
             <li><a href="#about">About</a></li>
-            <!-- Remove these links if you don't want them in the navigation -->
-            <!-- <li><a href="#updates">Updates</a></li>
-            <li><a href="#staff">Staff</a></li> -->
+            <li><a href="#updates">Updates</a></li>
+            <li><a href="#staff">Staff</a></li>
         </ul>
     </nav>
     <main>
@@ -27,15 +46,14 @@
             <h2>About</h2>
             <p>Learn more about our server and community.</p>
         </section>
-        <!-- Remove or comment out these sections if you don't want them to appear -->
-        <!-- <section id="updates">
+        <section id="updates">
             <h2>Updates</h2>
             <p>Here are the latest updates and news.</p>
         </section>
         <section id="staff">
             <h2>Staff</h2>
             <p>Meet our dedicated staff members.</p>
-        </section> -->
+        </section>
     </main>
     <footer>
         <p>&copy; 2025 Minecraft Server. All rights reserved.</p>
