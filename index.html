@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Server</title>
     <style>
         body {
@@ -225,26 +226,18 @@
         <section id="home" class="active">
             <h2>Home</h2>
             <p>Welcome to our Minecraft server. Enjoy your stay!</p>
-            <p>Also if you are texting in forms you have to refresh</p>
-            <p>your page to see new replys or fourms and that goes for rules too</p>
         </section>
         <section id="about">
             <h2>About</h2>
             <p>Learn more about our server and community.</p>
-            <p>------------------------------------------</p>
-            <p>I made this server to have players have fun</p>
-            <p>and to not be mean just chill and play so look at the rules</p>
         </section>
         <section id="updates">
             <h2>Updates</h2>
             <p>Here are the latest updates and news.</p>
-            <p>-------------------------------------</p>
-            <p>Server is up!!</p>
         </section>
         <section id="staff">
             <h2>Staff</h2>
             <p>Meet our dedicated staff members.</p>
-            <p>Owner: Not_game80</p>
         </section>
         <section id="forums">
             <h2>Forums</h2>
@@ -258,7 +251,7 @@
         </section>
         <section id="rules">
             <h2>Rules</h2>
-            <div class="rules-container">
+            <div class="rules-container hidden" id="rules-container">
                 <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
                 <button id="add-rule-button" onclick="submitRule()">Add Rule</button>
             </div>
@@ -386,7 +379,7 @@
 
         function submitRule() {
             if (currentUser !== '111222999owner') {
-                alert('Only 111222999owner can add rules.');
+                alert('Only the owner can add rules.');
                 return;
             }
 
@@ -469,7 +462,7 @@
 
         function deleteForm(index) {
             if (currentUser !== '111222999owner') {
-                alert('Only 111222999owner can delete forums.');
+                alert('Only the owner can delete forums.');
                 return;
             }
 
@@ -482,7 +475,7 @@
 
         function deleteRule(index) {
             if (currentUser !== '111222999owner') {
-                alert('Only 111222999owner can delete rules.');
+                alert('Only the owner can delete rules.');
                 return;
             }
 
@@ -509,19 +502,14 @@
                 signInButton.classList.add('hidden');
                 logoutButton.classList.remove('hidden');
                 if (currentUser === '111222999owner') {
-                    ruleInput.disabled = false;
-                    addRuleButton.disabled = false;
                     rulesContainer.classList.remove('hidden');
                 } else {
-                    ruleInput.disabled = true;
-                    addRuleButton.disabled = true;
+                    rulesContainer.classList.add('hidden');
                 }
             } else {
                 signInButton.classList.remove('hidden');
                 logoutButton.classList.add('hidden');
                 rulesContainer.classList.add('hidden');
-                ruleInput.disabled = true;
-                addRuleButton.disabled = true;
             }
         }
 
