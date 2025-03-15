@@ -156,7 +156,7 @@
             <li><a href="#updates">Updates</a></li>
             <li><a href="#staff">Staff</a></li>
             <li><a href="#forms">Forms</a></li>
-            <li><a href="#sign-in">Sign In!</a></li>
+            <li><a href="#sign-in">Sign In</a></li>
         </ul>
     </nav>
     <main>
@@ -191,6 +191,7 @@
             <h2>Sign In</h2>
             <input type="text" id="username" name="username" placeholder="Enter your username">
             <button onclick="signIn()">Sign In</button>
+            <button onclick="logout()" class="hidden" id="logout-btn">Logout</button>
         </section>
     </main>
     <footer>
@@ -216,9 +217,13 @@
             }
 
             const users = JSON.parse(localStorage.getItem(usersKey)) || {};
-            if (users[username]) {
+            if (users[username] && users[username] !== currentUser) {
                 alert('Username already exists. Please choose a different username.');
                 return;
+            }
+
+            if (currentUser && currentUser !== username) {
+                delete users[currentUser];
             }
 
             currentUser = username;
@@ -227,6 +232,14 @@
 
             alert(`Signed in as ${currentUser}`);
             document.getElementById('sign-in').classList.add('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            toggleDeleteAllFormsButton();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('sign-in').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.add('hidden');
             toggleDeleteAllFormsButton();
         }
 
@@ -335,9 +348,11 @@
             if (activeUser) {
                 currentUser = activeUser;
                 document.getElementById('sign-in').classList.add('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
             } else {
                 currentUser = null;
                 document.getElementById('sign-in').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.add('hidden');
             }
         }
 
