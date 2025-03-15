@@ -11,9 +11,6 @@
 <body>
     <header>
         <h1>Welcome to the Minecraft Server</h1>
-        <div class="auth-buttons">
-            <button onclick="toggleAccountModal()">Account</button>
-        </div>
     </header>
     <nav>
         <ul>
@@ -46,7 +43,7 @@
             <h2>Rules</h2>
             <div class="rules-container" id="rules-container">
                 <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
-                <button id="add-rule-button" onclick="addRule()">Add Rule</a></button>
+                <button id="add-rule-button" onclick="addRule()">Add Rule</button>
             </div>
             <div class="rules" id="rules-content">
                 <div class="rule">
@@ -73,132 +70,8 @@
         <p>&copy; 2025 Minecraft Server. All rights reserved.</p>
     </footer>
 
-    <div id="account-modal">
-        <div id="account-modal-content">
-            <span id="close-modal" onclick="toggleAccountModal()">&times;</span>
-            <h2>Account</h2>
-            <input type="email" id="email" placeholder="Enter your email">
-            <input type="password" id="password" placeholder="Enter your password">
-            <input type="text" id="username" placeholder="Enter your username">
-            <button id="sign-up-button" onclick="signUp()">Sign Up</button>
-            <button id="sign-in-button" onclick="signIn()">Sign In</button>
-            <button id="logout-button" class="hidden" onclick="logout()">Logout</button>
-        </div>
-    </div>
-
     <script>
-        const repoOwner = 'notgame-minecraft';
-        const repoName = 'minecraft-server-users';
-        const filePath = 'users.json';
-        const githubToken = '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';
-
-        let currentUser = null;
-        const currentUserKey = 'currentUser';
-
-        function toggleAccountModal() {
-            const accountModal = document.getElementById('account-modal');
-            accountModal.style.display = accountModal.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(String(email).toLowerCase());
-        }
-
-        async function fetchFileContent() {
-            const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-                headers: {
-                    'Authorization': `token ${githubToken}`
-                }
-            });
-            const data = await response.json();
-            return JSON.parse(atob(data.content));
-        }
-
-        async function updateFileContent(content) {
-            const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-                headers: {
-                    'Authorization': `token ${githubToken}`
-                }
-            });
-            const data = await response.json();
-            const sha = data.sha;
-            const updatedContent = btoa(JSON.stringify(content, null, 2));
-
-            await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${githubToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: 'Update users.json',
-                    content: updatedContent,
-                    sha: sha
-                })
-            });
-        }
-
-        async function signUp() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const username = document.getElementById('username').value.trim();
-
-            if (!validateEmail(email)) {
-                alert('Please enter a valid email.');
-                return;
-            }
-            if (!email || !password || !username) {
-                alert('Please enter your email, password, and username.');
-                return;
-            }
-
-            const users = await fetchFileContent();
-            if (users[email]) {
-                alert('Email is already registered.');
-                return;
-            }
-
-            users[email] = { password, username };
-            await updateFileContent(users);
-            alert('User registered successfully.');
-            toggleAccountModal();
-        }
-
-        async function signIn() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            if (!email || !password) {
-                alert('Please enter your email and password.');
-                return;
-            }
-
-            const users = await fetchFileContent();
-            if (!users[email] || users[email].password !== password) {
-                alert('Invalid email or password.');
-                return;
-            }
-
-            currentUser = { email, username: users[email].username };
-            localStorage.setItem(currentUserKey, JSON.stringify(currentUser));
-            updateAuthUI();
-            toggleAccountModal();
-        }
-
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem(currentUserKey);
-            updateAuthUI();
-            toggleAccountModal();
-        }
-
         function addRule() {
-            if (!currentUser) {
-                alert('Please sign in first.');
-                return;
-            }
-
             const ruleInput = document.getElementById('rule-input');
             const ruleText = ruleInput.value.trim();
             if (ruleText === '') {
@@ -210,48 +83,13 @@
             const ruleElement = document.createElement('div');
             ruleElement.className = 'rule';
             ruleElement.innerHTML = `
-                <div class="username">${currentUser.username}</div>
+                <div class="username">Server Admin</div>
                 <div>${ruleText}</div>
             `;
             rulesContainer.appendChild(ruleElement);
 
             ruleInput.value = '';
         }
-
-        function loadUser() {
-            const user = JSON.parse(localStorage.getItem(currentUserKey));
-            if (user) {
-                currentUser = user;
-                document.getElementById('user-email').innerText = user.email;
-                document.getElementById('user-username').innerText = user.username;
-                updateAuthUI();
-            }
-        }
-
-        function updateAuthUI() {
-            const signInButton = document.getElementById('sign-in-button');
-            const signUpButton = document.getElementById('sign-up-button');
-            const logoutButton = document.getElementById('logout-button');
-            const rulesContainer = document.getElementById('rules-container');
-
-            if (currentUser) {
-                signInButton.classList.add('hidden');
-                signUpButton.classList.add('hidden');
-                logoutButton.classList.remove('hidden');
-                rulesContainer.classList.remove('hidden');
-            } else {
-                signInButton.classList.remove('hidden');
-                signUpButton.classList.remove('hidden');
-                logoutButton.classList.add('hidden');
-                rulesContainer.classList.add('hidden');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadUser();
-            updateAuthUI();
-            showSection(null, 'home');
-        });
 
         function showSection(event, sectionId) {
             if (event) event.preventDefault();
@@ -261,6 +99,10 @@
             });
             document.getElementById(sectionId).classList.add('active');
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection(null, 'home');
+        });
     </script>
 </body>
 </html>
