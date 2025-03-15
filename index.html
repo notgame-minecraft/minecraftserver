@@ -156,7 +156,7 @@
             <li><a href="#updates">Updates</a></li>
             <li><a href="#staff">Staff</a></li>
             <li><a href="#forms">Forms</a></li>
-            <li><a href="#sign-in">Sign In!!</a></li>
+            <li><a href="#sign-in">Sign In</a></li>
         </ul>
     </nav>
     <main>
@@ -201,6 +201,7 @@
         let currentUser = null;
         const formsKey = 'forms';
         const usersKey = 'users';
+        const currentUserKey = 'currentUser';
 
         document.addEventListener('DOMContentLoaded', () => {
             loadForms();
@@ -229,6 +230,7 @@
             currentUser = username;
             users[currentUser] = new Date().toISOString();
             localStorage.setItem(usersKey, JSON.stringify(users));
+            localStorage.setItem(currentUserKey, currentUser);
 
             alert(`Signed in as ${currentUser}`);
             document.getElementById('sign-in').classList.add('hidden');
@@ -238,6 +240,7 @@
 
         function logout() {
             currentUser = null;
+            localStorage.removeItem(currentUserKey);
             document.getElementById('sign-in').classList.remove('hidden');
             document.getElementById('logout-btn').classList.add('hidden');
             toggleDeleteAllFormsButton();
@@ -332,21 +335,21 @@
 
         function loadUser() {
             const users = JSON.parse(localStorage.getItem(usersKey)) || {};
-            const twoMonthsAgo = new Date();
-            twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
             // Remove inactive users
             for (const [username, lastActive] of Object.entries(users)) {
-                if (new Date(lastActive) < twoMonthsAgo) {
+                if (new Date(lastActive) < oneMonthAgo) {
                     delete users[username];
                 }
             }
             localStorage.setItem(usersKey, JSON.stringify(users));
 
-            // Check if the current user is still active
-            const activeUser = Object.keys(users).find(username => users[username] === currentUser);
-            if (activeUser) {
-                currentUser = activeUser;
+            // Restore current user from localStorage
+            currentUser = localStorage.getItem(currentUserKey);
+
+            if (currentUser && users[currentUser]) {
                 document.getElementById('sign-in').classList.add('hidden');
                 document.getElementById('logout-btn').classList.remove('hidden');
             } else {
