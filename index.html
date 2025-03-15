@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server!!</title>
+    <title>Minecraft Server</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-image: url('images\minecraft.jpg'); /* Ensure this path is correct */
+            background-image: url('images/minecraft.jpg'); /* Ensure this path is correct */
             background-size: cover; /* Cover the entire background */
             background-repeat: no-repeat; /* Prevent the image from repeating */
             background-position: center; /* Center the image */
@@ -76,13 +76,13 @@
             margin-top: auto;
             color: #95a5a6; /* Light gray color */
         }
-        .form-container, .reply-container {
+        .form-container, .reply-container, .rules-container {
             margin: 20px 0;
             background: #333;
             padding: 10px;
             border-radius: 5px;
         }
-        .form-container textarea, .reply-container textarea {
+        .form-container textarea, .reply-container textarea, .rules-container textarea {
             width: 100%;
             height: 100px;
             margin-bottom: 10px;
@@ -93,7 +93,7 @@
             border-radius: 5px;
             box-sizing: border-box;
         }
-        .form-container button, .reply-container button {
+        .form-container button, .reply-container button, .rules-container button {
             padding: 10px 20px;
             background: #e74c3c;
             border: none;
@@ -102,23 +102,23 @@
             cursor: pointer;
             transition: background 0.3s;
         }
-        .form-container button:hover, .reply-container button:hover {
+        .form-container button:hover, .reply-container button:hover, .rules-container button:hover {
             background: #c0392b;
         }
-        .messages, .forms {
+        .messages, .forms, .rules {
             margin-top: 20px;
         }
-        .message, .form {
+        .message, .form, .rule {
             background: rgba(255, 255, 255, 0.1);
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 10px;
             text-align: left;
         }
-        .message .username, .form .username {
+        .message .username, .form .username, .rule .username {
             font-weight: bold;
         }
-        .message .profile-pic, .form .profile-pic {
+        .message .profile-pic, .form .profile-pic, .rule .profile-pic {
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -156,6 +156,7 @@
             <li><a href="#updates">Updates</a></li>
             <li><a href="#staff">Staff</a></li>
             <li><a href="#forms">Forms</a></li>
+            <li><a href="#rules">Rules</a></li>
             <li><a href="#sign-in" id="sign-in-link">Sign In</a></li>
         </ul>
     </nav>
@@ -187,6 +188,16 @@
             </div>
             <button id="delete-all-forms" onclick="deleteAllForms()" class="hidden">Delete All Forms</button>
         </section>
+        <section id="rules">
+            <h2>Rules</h2>
+            <div class="rules-container hidden" id="rules-container">
+                <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
+                <button onclick="submitRule()">Add Rule</button>
+            </div>
+            <div class="rules" id="rules-container">
+                <!-- Rules will be displayed here -->
+            </div>
+        </section>
         <section id="sign-in">
             <h2>Sign In</h2>
             <input type="text" id="username" name="username" placeholder="Enter your username">
@@ -202,11 +213,13 @@
     <script>
         let currentUser = null;
         const formsKey = 'forms';
+        const rulesKey = 'rules';
         const usersKey = 'users';
         const currentUserKey = 'currentUser';
 
         document.addEventListener('DOMContentLoaded', () => {
             loadForms();
+            loadRules();
             loadUser();
             updateAuthUI();
         });
@@ -297,6 +310,31 @@
             loadForms();
         }
 
+        function submitRule() {
+            if (currentUser !== 'owner') {
+                alert('Only the owner can add rules.');
+                return;
+            }
+
+            const ruleInput = document.getElementById('rule-input');
+            const ruleText = ruleInput.value.trim();
+            if (ruleText === '') {
+                alert('Please enter a rule.');
+                return;
+            }
+
+            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
+            rules.push({
+                username: currentUser,
+                timestamp: new Date().toISOString(),
+                text: ruleText
+            });
+            localStorage.setItem(rulesKey, JSON.stringify(rules));
+
+            ruleInput.value = '';
+            loadRules();
+        }
+
         function loadForms() {
             const formsContainer = document.getElementById('forms-container');
             formsContainer.innerHTML = '';
@@ -331,6 +369,42 @@
             localStorage.setItem(formsKey, JSON.stringify(updatedForms));
         }
 
+        function loadRules() {
+            const rulesContainer = document.getElementById('rules-container');
+            rulesContainer.innerHTML = '';
+            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
+
+            rules.forEach((rule, index) => {
+                const ruleElement = document.createElement('div');
+                ruleElement.className = 'rule';
+                ruleElement.innerHTML = `
+                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${rule.username}</div>
+                    <div>${rule.text}</div>
+                    ${currentUser === 'owner' ? `<button onclick="deleteRule(${index})">Delete</button>` : ''}
+                `;
+                rulesContainer.appendChild(ruleElement);
+            });
+
+            // Clean up old rules
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            const updatedRules = rules.filter(rule => new Date(rule.timestamp) > oneMonthAgo);
+            localStorage.setItem(rulesKey, JSON.stringify(updatedRules));
+        }
+
+        function deleteRule(index) {
+            if (currentUser !== 'owner') {
+                alert('Only the owner can delete rules.');
+                return;
+            }
+
+            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
+            rules.splice(index, 1);
+            localStorage.setItem(rulesKey, JSON.stringify(rules));
+
+            loadRules();
+        }
+
         function loadUser() {
             const users = JSON.parse(localStorage.getItem(usersKey)) || {};
             const oneMonthAgo = new Date();
@@ -355,6 +429,7 @@
             const logoutSection = document.getElementById('logout');
             const signInLink = document.getElementById('sign-in-link');
             const deleteButton = document.getElementById('delete-all-forms');
+            const rulesContainer = document.getElementById('rules-container');
 
             if (currentUser) {
                 signInSection.classList.add('hidden');
@@ -362,14 +437,17 @@
                 signInLink.classList.add('hidden');
                 if (currentUser === 'owner') {
                     deleteButton.classList.remove('hidden');
+                    rulesContainer.classList.remove('hidden');
                 } else {
                     deleteButton.classList.add('hidden');
+                    rulesContainer.classList.add('hidden');
                 }
             } else {
                 signInSection.classList.remove('hidden');
                 logoutSection.classList.add('hidden');
                 signInLink.classList.remove('hidden');
                 deleteButton.classList.add('hidden');
+                rulesContainer.classList.add('hidden');
             }
         }
 
