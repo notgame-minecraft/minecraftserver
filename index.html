@@ -25,20 +25,41 @@
             background: rgba(0, 0, 0, 0.7);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         header h1 {
             margin: 0;
             font-size: 3em;
             color: #e74c3c; /* Bright red color */
         }
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .auth-buttons button {
+            padding: 10px 20px;
+            background: #2c3e50; /* Dark blue color */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .auth-buttons button:hover {
+            background: #e74c3c; /* Bright red color */
+        }
         nav ul {
             list-style-type: none;
             padding: 0;
             margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
         }
         nav ul li {
             display: inline;
-            margin: 0 15px;
         }
         nav ul li a {
             text-decoration: none;
@@ -125,21 +146,6 @@
             margin-right: 10px;
             vertical-align: middle;
         }
-        .sign-in {
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            margin: 20px auto;
-            width: 80%;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .sign-in input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: none;
-            border-radius: 5px;
-        }
         .hidden {
             display: none;
         }
@@ -148,6 +154,10 @@
 <body>
     <header>
         <h1>Welcome to the Minecraft Server</h1>
+        <div class="auth-buttons">
+            <button id="sign-in-button" onclick="toggleSignIn()">Sign In</button>
+            <button id="logout-button" class="hidden" onclick="logout()">Logout</button>
+        </div>
     </header>
     <nav>
         <ul>
@@ -157,7 +167,6 @@
             <li><a href="#staff">Staff</a></li>
             <li><a href="#forms">Forms</a></li>
             <li><a href="#rules">Rules</a></li>
-            <li><a href="#sign-in" id="sign-in-link">Sign In</a></li>
         </ul>
     </nav>
     <main>
@@ -194,18 +203,14 @@
                 <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
                 <button onclick="submitRule()">Add Rule</button>
             </div>
-            <div class="rules" id="rules-container">
-                 1. no cheating
+            <div class="rules" id="rules-content">
                 <!-- Rules will be displayed here -->
             </div>
         </section>
-        <section id="sign-in">
+        <section id="sign-in" class="hidden">
             <h2>Sign In</h2>
             <input type="text" id="username" name="username" placeholder="Enter your username">
             <button onclick="signIn()">Sign In</button>
-        </section>
-        <section id="logout" class="hidden">
-            <button onclick="logout()">Logout</button>
         </section>
     </main>
     <footer>
@@ -224,6 +229,11 @@
             loadUser();
             updateAuthUI();
         });
+
+        function toggleSignIn() {
+            const signInSection = document.getElementById('sign-in');
+            signInSection.classList.toggle('hidden');
+        }
 
         function signIn() {
             const usernameInput = document.getElementById('username');
@@ -250,6 +260,7 @@
 
             alert(`Signed in as ${currentUser}`);
             updateAuthUI();
+            toggleSignIn();
         }
 
         function logout() {
@@ -371,7 +382,7 @@
         }
 
         function loadRules() {
-            const rulesContainer = document.getElementById('rules-container');
+            const rulesContainer = document.getElementById('rules-content');
             rulesContainer.innerHTML = '';
             const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
 
@@ -426,16 +437,14 @@
         }
 
         function updateAuthUI() {
-            const signInSection = document.getElementById('sign-in');
-            const logoutSection = document.getElementById('logout');
-            const signInLink = document.getElementById('sign-in-link');
+            const signInButton = document.getElementById('sign-in-button');
+            const logoutButton = document.getElementById('logout-button');
             const deleteButton = document.getElementById('delete-all-forms');
             const rulesContainer = document.getElementById('rules-container');
 
             if (currentUser) {
-                signInSection.classList.add('hidden');
-                logoutSection.classList.remove('hidden');
-                signInLink.classList.add('hidden');
+                signInButton.classList.add('hidden');
+                logoutButton.classList.remove('hidden');
                 if (currentUser === 'owner') {
                     deleteButton.classList.remove('hidden');
                     rulesContainer.classList.remove('hidden');
@@ -444,9 +453,8 @@
                     rulesContainer.classList.add('hidden');
                 }
             } else {
-                signInSection.classList.remove('hidden');
-                logoutSection.classList.add('hidden');
-                signInLink.classList.remove('hidden');
+                signInButton.classList.remove('hidden');
+                logoutButton.classList.add('hidden');
                 deleteButton.classList.add('hidden');
                 rulesContainer.classList.add('hidden');
             }
