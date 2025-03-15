@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Serverss</title>
+    <title>Minecraft Server</title>
     <!-- Firebase scripts -->
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
@@ -299,7 +299,11 @@
     </script>
 
     <script>
-        // Your existing JavaScript code here
+        let currentUser = null;
+        const forumsKey = 'forums';
+        const rulesKey = 'rules';
+        const currentUserKey = 'currentUser';
+
         document.addEventListener('DOMContentLoaded', () => {
             loadForums();
             loadRules();
@@ -513,6 +517,4 @@
                 rulesContainer.classList.add('hidden');
             }
         }
-    </script>
-</body>
-</html>
+    </
