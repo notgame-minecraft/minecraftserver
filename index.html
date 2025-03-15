@@ -162,7 +162,7 @@
     <main>
         <section id="home">
             <h2>Home</h2>
-            <p>Welcome to our Minecraft server. Enjoy your stay!!</p>
+            <p>Welcome to our Minecraft server. Enjoy your stay!</p>
         </section>
         <section id="about">
             <h2>About</h2>
@@ -208,7 +208,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadForms();
             loadUser();
-            toggleDeleteAllFormsButton();
             updateAuthUI();
         });
 
@@ -237,14 +236,12 @@
 
             alert(`Signed in as ${currentUser}`);
             updateAuthUI();
-            toggleDeleteAllFormsButton();
         }
 
         function logout() {
             currentUser = null;
             localStorage.removeItem(currentUserKey);
             updateAuthUI();
-            toggleDeleteAllFormsButton();
         }
 
         function submitForm() {
@@ -350,37 +347,28 @@
             // Restore current user from localStorage
             currentUser = localStorage.getItem(currentUserKey);
 
-            if (currentUser && users[currentUser]) {
-                document.getElementById('sign-in').classList.add('hidden');
-                document.getElementById('logout').classList.remove('hidden');
-            } else {
-                currentUser = null;
-                document.getElementById('sign-in').classList.remove('hidden');
-                document.getElementById('logout').classList.add('hidden');
-            }
+            updateAuthUI();
         }
 
         function updateAuthUI() {
             const signInSection = document.getElementById('sign-in');
             const logoutSection = document.getElementById('logout');
             const signInLink = document.getElementById('sign-in-link');
+            const deleteButton = document.getElementById('delete-all-forms');
 
             if (currentUser) {
                 signInSection.classList.add('hidden');
                 logoutSection.classList.remove('hidden');
                 signInLink.classList.add('hidden');
+                if (currentUser === 'owner') {
+                    deleteButton.classList.remove('hidden');
+                } else {
+                    deleteButton.classList.add('hidden');
+                }
             } else {
                 signInSection.classList.remove('hidden');
                 logoutSection.classList.add('hidden');
                 signInLink.classList.remove('hidden');
-            }
-        }
-
-        function toggleDeleteAllFormsButton() {
-            const deleteButton = document.getElementById('delete-all-forms');
-            if (currentUser === 'owner') {
-                deleteButton.classList.remove('hidden');
-            } else {
                 deleteButton.classList.add('hidden');
             }
         }
