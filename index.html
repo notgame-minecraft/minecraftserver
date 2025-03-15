@@ -91,6 +91,7 @@
             border: none;
             padding: 10px;
             border-radius: 5px;
+            box-sizing: border-box;
         }
         .form-container button, .reply-container button {
             padding: 10px 20px;
@@ -125,7 +126,6 @@
             vertical-align: middle;
         }
         .sign-in {
-            display: none;
             padding: 20px;
             background: rgba(0, 0, 0, 0.8);
             margin: 20px auto;
@@ -139,6 +139,9 @@
             margin-bottom: 10px;
             border: none;
             border-radius: 5px;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -159,7 +162,7 @@
     <main>
         <section id="home">
             <h2>Home</h2>
-            <p>Welcome to our Minecraft server. Enjoy your stay!!</p>
+            <p>Welcome to our Minecraft server. Enjoy your stay!</p>
         </section>
         <section id="about">
             <h2>About</h2>
@@ -194,6 +197,13 @@
     </footer>
     <script>
         let currentUser = null;
+        const formsKey = 'forms';
+        const usersKey = 'users';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadForms();
+            loadUser();
+        });
 
         function signIn() {
             const usernameInput = document.getElementById('username');
@@ -204,8 +214,12 @@
             }
 
             currentUser = username;
+            const users = JSON.parse(localStorage.getItem(usersKey)) || {};
+            users[currentUser] = new Date().toISOString();
+            localStorage.setItem(usersKey, JSON.stringify(users));
+
             alert(`Signed in as ${currentUser}`);
-            document.getElementById('sign-in').style.display = 'none';
+            document.getElementById('sign-in').classList.add('hidden');
         }
 
         function submitForm() {
@@ -221,21 +235,17 @@
                 return;
             }
 
-            const formsContainer = document.getElementById('forms-container');
-            const formElement = document.createElement('div');
-            formElement.className = 'form';
-            formElement.innerHTML = `
-                <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${currentUser}</div>
-                <div>${formText}</div>
-                <div class="reply-container">
-                    <textarea placeholder="Enter your reply here..."></textarea>
-                    <button onclick="submitReply(this)">Reply</button>
-                </div>
-                <div class="messages"></div>
-            `;
+            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
+            forms.push({
+                username: currentUser,
+                timestamp: new Date().toISOString(),
+                text: formText,
+                replies: []
+            });
+            localStorage.setItem(formsKey, JSON.stringify(forms));
 
-            formsContainer.appendChild(formElement);
             formInput.value = '';
+            loadForms();
         }
 
         function submitReply(button) {
@@ -252,16 +262,75 @@
                 return;
             }
 
-            const messagesContainer = replyContainer.nextElementSibling;
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            messageElement.innerHTML = `
-                <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${currentUser}</div>
-                <div>${replyText}</div>
-            `;
+            const formIndex = replyContainer.dataset.formIndex;
+            const forms = JSON.parse(localStorage.getItem(formsKey));
+            forms[formIndex].replies.push({
+                username: currentUser,
+                timestamp: new Date().toISOString(),
+                text: replyText
+            });
+            localStorage.setItem(formsKey, JSON.stringify(forms));
 
-            messagesContainer.appendChild(messageElement);
             replyInput.value = '';
+            loadForms();
+        }
+
+        function loadForms() {
+            const formsContainer = document.getElementById('forms-container');
+            formsContainer.innerHTML = '';
+            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
+
+            forms.forEach((form, index) => {
+                const formElement = document.createElement('div');
+                formElement.className = 'form';
+                formElement.innerHTML = `
+                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${form.username}</div>
+                    <div>${form.text}</div>
+                    <div class="reply-container" data-form-index="${index}">
+                        <textarea placeholder="Enter your reply here..."></textarea>
+                        <button onclick="submitReply(this)">Reply</button>
+                    </div>
+                    <div class="messages">
+                        ${form.replies.map(reply => `
+                            <div class="message">
+                                <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username}</div>
+                                <div>${reply.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                formsContainer.appendChild(formElement);
+            });
+
+            // Clean up old forms
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            const updatedForms = forms.filter(form => new Date(form.timestamp) > oneMonthAgo);
+            localStorage.setItem(formsKey, JSON.stringify(updatedForms));
+        }
+
+        function loadUser() {
+            const users = JSON.parse(localStorage.getItem(usersKey)) || {};
+            const twoMonthsAgo = new Date();
+            twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+            // Remove inactive users
+            for (const [username, lastActive] of Object.entries(users)) {
+                if (new Date(lastActive) < twoMonthsAgo) {
+                    delete users[username];
+                }
+            }
+            localStorage.setItem(usersKey, JSON.stringify(users));
+
+            // Check if the current user is still active
+            const activeUser = Object.keys(users).find(username => users[username] === currentUser);
+            if (activeUser) {
+                currentUser = activeUser;
+                document.getElementById('sign-in').classList.add('hidden');
+            } else {
+                currentUser = null;
+                document.getElementById('sign-in').classList.remove('hidden');
+            }
         }
     </script>
 </body>
