@@ -166,7 +166,7 @@
             <li><a href="#updates">Updates</a></li>
             <li><a href="#staff">Staff</a></li>
             <li><a href="#forms">Forms</a></li>
-            <li><a href="#rules">Rules!</a></li>
+            <li><a href="#rules">Rules</a></li>
         </ul>
     </nav>
     <main>
@@ -199,7 +199,7 @@
         </section>
         <section id="rules">
             <h2>Rules</h2>
-            <div class="rules-container" id="rules-container">
+            <div class="rules-container hidden" id="rules-container">
                 <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
                 <button onclick="submitRule()">Add Rule</button>
             </div>
@@ -247,10 +247,6 @@
             if (users[username] && users[username] !== currentUser) {
                 alert('Username already exists. Please choose a different username.');
                 return;
-            }
-
-            if (currentUser && currentUser !== username) {
-                delete users[currentUser];
             }
 
             currentUser = username;
@@ -456,6 +452,7 @@
             } else {
                 signInButton.classList.remove('hidden');
                 logoutButton.classList.add('hidden');
+                signInSection.classList.remove('hidden');
                 deleteButton.classList.add('hidden');
                 rulesContainer.classList.add('hidden');
             }
