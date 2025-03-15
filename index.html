@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server!!</title>
+    <title>Minecraft Server</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -275,6 +277,21 @@
     </div>
 
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_FIREBASE_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_FIREBASE_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            storageBucket: "YOUR_FIREBASE_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_FIREBASE_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         let currentUser = null;
         const forumsKey = 'forums';
         const rulesKey = 'rules';
@@ -337,14 +354,13 @@
                 return;
             }
 
-            const forums = JSON.parse(localStorage.getItem(forumsKey)) || [];
-            forums.push({
+            const newFormRef = firebase.database().ref(forumsKey).push();
+            newFormRef.set({
                 username: currentUser,
                 timestamp: new Date().toISOString(),
                 text: formText,
                 replies: []
             });
-            localStorage.setItem(forumsKey, JSON.stringify(forums));
 
             formInput.value = '';
             loadForums();
@@ -365,13 +381,12 @@
             }
 
             const formIndex = replyContainer.dataset.formIndex;
-            const forums = JSON.parse(localStorage.getItem(forumsKey));
-            forums[formIndex].replies.push({
+            const formRef = firebase.database().ref(`${forumsKey}/${formIndex}/replies`).push();
+            formRef.set({
                 username: currentUser,
                 timestamp: new Date().toISOString(),
                 text: replyText
             });
-            localStorage.setItem(forumsKey, JSON.stringify(forums));
 
             replyInput.value = '';
             loadForums();
@@ -390,13 +405,12 @@
                 return;
             }
 
-            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
-            rules.push({
+            const newRuleRef = firebase.database().ref(rulesKey).push();
+            newRuleRef.set({
                 username: 'Owner',
                 timestamp: new Date().toISOString(),
                 text: ruleText
             });
-            localStorage.setItem(rulesKey, JSON.stringify(rules));
 
             ruleInput.value = '';
             loadRules();
@@ -405,59 +419,51 @@
         function loadForums() {
             const forumsContainer = document.getElementById('forums-container');
             forumsContainer.innerHTML = '';
-            const forums = JSON.parse(localStorage.getItem(forumsKey)) || [];
 
-            forums.forEach((forum, index) => {
-                const forumElement = document.createElement('div');
-                forumElement.className = 'form';
-                forumElement.innerHTML = `
-                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${forum.username === '111222999owner' ? 'Owner' : forum.username}</div>
-                    <div>${forum.text}</div>
-                    ${currentUser === '111222999owner' ? `<button onclick="deleteForm(${index})">Delete</button>` : ''}
-                    <div class="reply-container" data-form-index="${index}">
-                        <textarea placeholder="Enter your reply here..." name="reply-text"></textarea>
-                        <button onclick="submitReply(this)">Reply</button>
-                    </div>
-                    <div class="messages">
-                        ${forum.replies.map(reply => `
-                            <div class="message">
-                                <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username === '111222999owner' ? 'Owner' : reply.username}</div>
-                                <div>${reply.text}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                forumsContainer.appendChild(forumElement);
+            firebase.database().ref(forumsKey).on('value', snapshot => {
+                const forums = snapshot.val();
+                for (const [index, forum] of Object.entries(forums)) {
+                    const forumElement = document.createElement('div');
+                    forumElement.className = 'form';
+                    forumElement.innerHTML = `
+                        <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${forum.username === '111222999owner' ? 'Owner' : forum.username}</div>
+                        <div>${forum.text}</div>
+                        ${currentUser === '111222999owner' ? `<button onclick="deleteForm('${index}')">Delete</button>` : ''}
+                        <div class="reply-container" data-form-index="${index}">
+                            <textarea placeholder="Enter your reply here..." name="reply-text"></textarea>
+                            <button onclick="submitReply(this)">Reply</button>
+                        </div>
+                        <div class="messages">
+                            ${forum.replies ? Object.values(forum.replies).map(reply => `
+                                <div class="message">
+                                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username === '111222999owner' ? 'Owner' : reply.username}</div>
+                                    <div>${reply.text}</div>
+                                </div>
+                            `).join('') : ''}
+                        </div>
+                    `;
+                    forumsContainer.appendChild(forumElement);
+                }
             });
-
-            // Clean up old forums
-            const oneMonthAgo = new Date();
-            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-            const updatedForums = forums.filter(forum => new Date(forum.timestamp) > oneMonthAgo);
-            localStorage.setItem(forumsKey, JSON.stringify(updatedForums));
         }
 
         function loadRules() {
             const rulesContainer = document.getElementById('rules-content');
             rulesContainer.innerHTML = '';
-            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
 
-            rules.forEach((rule, index) => {
-                const ruleElement = document.createElement('div');
-                ruleElement.className = 'rule';
-                ruleElement.innerHTML = `
-                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${rule.username}</div>
-                    <div>${rule.text}</div>
-                    ${currentUser === '111222999owner' ? `<button onclick="deleteRule(${index})">Delete</button>` : ''}
-                `;
-                rulesContainer.appendChild(ruleElement);
+            firebase.database().ref(rulesKey).on('value', snapshot => {
+                const rules = snapshot.val();
+                for (const [index, rule] of Object.entries(rules)) {
+                    const ruleElement = document.createElement('div');
+                    ruleElement.className = 'rule';
+                    ruleElement.innerHTML = `
+                        <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${rule.username}</div>
+                        <div>${rule.text}</div>
+                        ${currentUser === '111222999owner' ? `<button onclick="deleteRule('${index}')">Delete</button>` : ''}
+                    `;
+                    rulesContainer.appendChild(ruleElement);
+                }
             });
-
-            // Clean up old rules
-            const oneMonthAgo = new Date();
-            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-            const updatedRules = rules.filter(rule => new Date(rule.timestamp) > oneMonthAgo);
-            localStorage.setItem(rulesKey, JSON.stringify(updatedRules));
         }
 
         function deleteForm(index) {
@@ -466,10 +472,7 @@
                 return;
             }
 
-            const forums = JSON.parse(localStorage.getItem(forumsKey)) || [];
-            forums.splice(index, 1);
-            localStorage.setItem(forumsKey, JSON.stringify(forums));
-
+            firebase.database().ref(`${forumsKey}/${index}`).remove();
             loadForums();
         }
 
@@ -479,10 +482,7 @@
                 return;
             }
 
-            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
-            rules.splice(index, 1);
-            localStorage.setItem(rulesKey, JSON.stringify(rules));
-
+            firebase.database().ref(`${rulesKey}/${index}`).remove();
             loadRules();
         }
 
@@ -495,8 +495,6 @@
             const signInButton = document.getElementById('sign-in-button');
             const logoutButton = document.getElementById('logout-button');
             const rulesContainer = document.getElementById('rules-container');
-            const ruleInput = document.getElementById('rule-input');
-            const addRuleButton = document.getElementById('add-rule-button');
 
             if (currentUser) {
                 signInButton.classList.add('hidden');
@@ -512,7 +510,6 @@
                 rulesContainer.classList.add('hidden');
             }
         }
-
     </script>
 </body>
 </html>
