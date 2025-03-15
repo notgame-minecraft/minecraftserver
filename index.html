@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Servers</title>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Server</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -128,7 +127,7 @@
         .form-container button:hover, .reply-container button:hover, .rules-container button:hover {
             background: #c0392b;
         }
-        .messages, .forms, .rules {
+        .messages, .forums, .rules {
             margin-top: 20px;
         }
         .message, .form, .rule {
@@ -245,13 +244,13 @@
                 <textarea id="form-input" name="form-topic" placeholder="Enter your form topic here..."></textarea>
                 <button onclick="submitForm()">Create Form</button>
             </div>
-            <div class="forms" id="forms-container">
-                <!-- Forms will be displayed here -->
+            <div class="forums" id="forums-container">
+                <!-- Forums will be displayed here -->
             </div>
         </section>
         <section id="rules">
             <h2>Rules</h2>
-            <div class="rules-container hidden" id="rules-container">
+            <div class="rules-container">
                 <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
                 <button id="add-rule-button" onclick="submitRule()">Add Rule</button>
             </div>
@@ -276,12 +275,12 @@
 
     <script>
         let currentUser = null;
-        const formsKey = 'forms';
+        const forumsKey = 'forums';
         const rulesKey = 'rules';
         const currentUserKey = 'currentUser';
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadForms();
+            loadForums();
             loadRules();
             loadUser();
             updateAuthUI();
@@ -337,17 +336,17 @@
                 return;
             }
 
-            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
-            forms.push({
+            const forums = JSON.parse(localStorage.getItem(forumsKey)) || [];
+            forums.push({
                 username: currentUser,
                 timestamp: new Date().toISOString(),
                 text: formText,
                 replies: []
             });
-            localStorage.setItem(formsKey, JSON.stringify(forms));
+            localStorage.setItem(forumsKey, JSON.stringify(forums));
 
             formInput.value = '';
-            loadForms();
+            loadForums();
         }
 
         function submitReply(button) {
@@ -365,16 +364,16 @@
             }
 
             const formIndex = replyContainer.dataset.formIndex;
-            const forms = JSON.parse(localStorage.getItem(formsKey));
-            forms[formIndex].replies.push({
+            const forums = JSON.parse(localStorage.getItem(forumsKey));
+            forums[formIndex].replies.push({
                 username: currentUser,
                 timestamp: new Date().toISOString(),
                 text: replyText
             });
-            localStorage.setItem(formsKey, JSON.stringify(forms));
+            localStorage.setItem(forumsKey, JSON.stringify(forums));
 
             replyInput.value = '';
-            loadForms();
+            loadForums();
         }
 
         function submitRule() {
@@ -392,7 +391,7 @@
 
             const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
             rules.push({
-                username: currentUser,
+                username: 'Owner',
                 timestamp: new Date().toISOString(),
                 text: ruleText
             });
@@ -402,39 +401,39 @@
             loadRules();
         }
 
-        function loadForms() {
-            const formsContainer = document.getElementById('forms-container');
-            formsContainer.innerHTML = '';
-            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
+        function loadForums() {
+            const forumsContainer = document.getElementById('forums-container');
+            forumsContainer.innerHTML = '';
+            const forums = JSON.parse(localStorage.getItem(forumsKey)) || [];
 
-            forms.forEach((form, index) => {
-                const formElement = document.createElement('div');
-                formElement.className = 'form';
-                formElement.innerHTML = `
-                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${form.username}</div>
-                    <div>${form.text}</div>
+            forums.forEach((forum, index) => {
+                const forumElement = document.createElement('div');
+                forumElement.className = 'form';
+                forumElement.innerHTML = `
+                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${forum.username === '111222999owner' ? 'Owner' : forum.username}</div>
+                    <div>${forum.text}</div>
                     ${currentUser === '111222999owner' ? `<button onclick="deleteForm(${index})">Delete</button>` : ''}
                     <div class="reply-container" data-form-index="${index}">
                         <textarea placeholder="Enter your reply here..." name="reply-text"></textarea>
                         <button onclick="submitReply(this)">Reply</button>
                     </div>
                     <div class="messages">
-                        ${form.replies.map(reply => `
+                        ${forum.replies.map(reply => `
                             <div class="message">
-                                <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username}</div>
+                                <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username === '111222999owner' ? 'Owner' : reply.username}</div>
                                 <div>${reply.text}</div>
                             </div>
                         `).join('')}
                     </div>
                 `;
-                formsContainer.appendChild(formElement);
+                forumsContainer.appendChild(forumElement);
             });
 
-            // Clean up old forms
+            // Clean up old forums
             const oneMonthAgo = new Date();
             oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-            const updatedForms = forms.filter(form => new Date(form.timestamp) > oneMonthAgo);
-            localStorage.setItem(formsKey, JSON.stringify(updatedForms));
+            const updatedForums = forums.filter(forum => new Date(forum.timestamp) > oneMonthAgo);
+            localStorage.setItem(forumsKey, JSON.stringify(updatedForums));
         }
 
         function loadRules() {
@@ -462,15 +461,15 @@
 
         function deleteForm(index) {
             if (currentUser !== '111222999owner') {
-                alert('Only 111222999owner can delete forms.');
+                alert('Only 111222999owner can delete forums.');
                 return;
             }
 
-            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
-            forms.splice(index, 1);
-            localStorage.setItem(formsKey, JSON.stringify(forms));
+            const forums = JSON.parse(localStorage.getItem(forumsKey)) || [];
+            forums.splice(index, 1);
+            localStorage.setItem(forumsKey, JSON.stringify(forums));
 
-            loadForms();
+            loadForums();
         }
 
         function deleteRule(index) {
