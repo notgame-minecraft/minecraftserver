@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Serverr</title>
+    <title>Minecraft Server</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -95,13 +95,13 @@
             margin-top: auto;
             color: #95a5a6;
         }
-        .form-container, .reply-container, .rules-container {
+        .rules-container {
             margin: 20px 0;
             background: #333;
             padding: 10px;
             border-radius: 5px;
         }
-        .form-container textarea, .reply-container textarea, .rules-container textarea {
+        .rules-container textarea {
             width: 100%;
             height: 100px;
             margin-bottom: 10px;
@@ -112,7 +112,7 @@
             border-radius: 5px;
             box-sizing: border-box;
         }
-        .form-container button, .reply-container button, .rules-container button {
+        .rules-container button {
             padding: 10px 20px;
             background: #e74c3c;
             border: none;
@@ -121,7 +121,7 @@
             cursor: pointer;
             transition: background 0.3s;
         }
-        .form-container button:hover, .reply-container button:hover, .rules-container button:hover {
+        .rules-container button:hover {
             background: #c0392b;
         }
         .hidden {
@@ -194,7 +194,6 @@
             <li><a href="#about" onclick="showSection(event, 'about')">About</a></li>
             <li><a href="#updates" onclick="showSection(event, 'updates')">Updates</a></li>
             <li><a href="#staff" onclick="showSection(event, 'staff')">Staff</a></li>
-            <li><a href="#forums" onclick="showSection(event, 'forums')">Forums</a></li>
             <li><a href="#rules" onclick="showSection(event, 'rules')">Rules</a></li>
         </ul>
     </nav>
@@ -215,24 +214,25 @@
             <h2>Staff</h2>
             <p>Meet our dedicated staff members.</p>
         </section>
-        <section id="forums">
-            <h2>Forums</h2>
-            <div class="form-container">
-                <textarea id="form-input" name="form-topic" placeholder="Enter your forum topic here..."></textarea>
-                <button onclick="submitForm()">Create Forum</button>
-            </div>
-            <div class="forums" id="forums-container">
-                <!-- Forums will be displayed here -->
-            </div>
-        </section>
         <section id="rules">
             <h2>Rules</h2>
-            <div class="rules-container hidden" id="rules-container">
+            <div class="rules-container" id="rules-container">
                 <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
-                <button id="add-rule-button" onclick="submitRule()">Add Rule</button>
+                <button id="add-rule-button" onclick="addRule()">Add Rule</button>
             </div>
             <div class="rules" id="rules-content">
-                <!-- Rules will be displayed here -->
+                <div class="rule">
+                    <div class="username">Server Admin</div>
+                    <div>No griefing.</div>
+                </div>
+                <div class="rule">
+                    <div class="username">Server Admin</div>
+                    <div>No spamming.</div>
+                </div>
+                <div class="rule">
+                    <div class="username">Server Admin</div>
+                    <div>Be respectful to others.</div>
+                </div>
             </div>
         </section>
     </main>
@@ -244,42 +244,20 @@
         <div id="account-modal-content">
             <span id="close-modal" onclick="toggleAccountModal()">&times;</span>
             <h2>Account</h2>
-            <input type="text" id="username" placeholder="Enter your username">
+            <input type="email" id="email" placeholder="Enter your email">
+            <input type="password" id="password" placeholder="Enter your password">
+            <button id="sign-up-button" onclick="signUp()">Sign Up</button>
             <button id="sign-in-button" onclick="signIn()">Sign In</button>
             <button id="logout-button" class="hidden" onclick="logout()">Logout</button>
         </div>
     </div>
 
-    <!-- Firebase Initialization Script -->
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const analytics = firebase.analytics();
-        const database = firebase.database();
-
         let currentUser = null;
-        const forumsKey = 'forums';
-        const rulesKey = 'rules';
         const currentUserKey = 'currentUser';
+        const usersKey = 'users';
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadForums();
-            loadRules();
             loadUser();
             updateAuthUI();
             showSection(null, 'home');
@@ -290,15 +268,41 @@
             accountModal.style.display = accountModal.style.display === 'block' ? 'none' : 'block';
         }
 
-        function signIn() {
-            const usernameInput = document.getElementById('username');
-            let username = usernameInput.value.trim();
-            if (username === '') {
-                alert('Please enter a username.');
+        function signUp() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if (email === '' || password === '') {
+                alert('Please enter both email and password.');
                 return;
             }
 
-            currentUser = username;
+            let users = JSON.parse(localStorage.getItem(usersKey)) || {};
+            if (users[email]) {
+                alert('Email is already registered. Please sign in.');
+                return;
+            }
+
+            users[email] = { password: password };
+            localStorage.setItem(usersKey, JSON.stringify(users));
+
+            alert('Signed up successfully. Please sign in.');
+        }
+
+        function signIn() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if (email === '' || password === '') {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem(usersKey)) || {};
+            if (!users[email] || users[email].password !== password) {
+                alert('Invalid email or password.');
+                return;
+            }
+
+            currentUser = email;
             localStorage.setItem(currentUserKey, currentUser);
 
             alert(`Signed in as ${currentUser}`);
@@ -307,8 +311,8 @@
         }
 
         function logout() {
-            localStorage.removeItem(currentUserKey);
             currentUser = null;
+            localStorage.removeItem(currentUserKey);
             updateAuthUI();
             toggleAccountModal();
         }
@@ -322,64 +326,9 @@
             document.getElementById(sectionId).classList.add('active');
         }
 
-        function submitForm() {
+        function addRule() {
             if (!currentUser) {
                 alert('Please sign in first.');
-                return;
-            }
-
-            const formInput = document.getElementById('form-input');
-            const formText = formInput.value.trim();
-            if (formText === '') {
-                alert('Please enter a forum topic.');
-                return;
-            }
-
-            const newFormRef = firebase.database().ref(forumsKey).push();
-            newFormRef.set({
-                username: currentUser,
-                timestamp: new Date().toISOString(),
-                text: formText,
-                replies: []
-            }).then(() => {
-                formInput.value = '';
-                loadForums();
-            }).catch(error => {
-                console.error('Error submitting form:', error);
-            });
-        }
-
-        function submitReply(button) {
-            if (!currentUser) {
-                alert('Please sign in first.');
-                return;
-            }
-
-            const replyContainer = button.parentElement;
-            const replyInput = replyContainer.querySelector('textarea');
-            const replyText = replyInput.value.trim();
-            if (replyText === '') {
-                alert('Please enter a reply.');
-                return;
-            }
-
-            const formIndex = replyContainer.dataset.formIndex;
-            const formRef = firebase.database().ref(`${forumsKey}/${formIndex}/replies`).push();
-            formRef.set({
-                username: currentUser,
-                timestamp: new Date().toISOString(),
-                text: replyText
-            }).then(() => {
-                replyInput.value = '';
-                loadForums();
-            }).catch(error => {
-                console.error('Error submitting reply:', error);
-            });
-        }
-
-        function submitRule() {
-            if (currentUser !== '111222999owner') {
-                alert('Only the owner can add rules.');
                 return;
             }
 
@@ -390,93 +339,16 @@
                 return;
             }
 
-            const newRuleRef = firebase.database().ref(rulesKey).push();
-            newRuleRef.set({
-                username: 'Owner',
-                timestamp: new Date().toISOString(),
-                text: ruleText
-            }).then(() => {
-                ruleInput.value = '';
-                loadRules();
-            }).catch(error => {
-                console.error('Error submitting rule:', error);
-            });
-        }
-
-        function loadForums() {
-            const forumsContainer = document.getElementById('forums-container');
-            forumsContainer.innerHTML = '';
-
-            firebase.database().ref(forumsKey).on('value', snapshot => {
-                const forums = snapshot.val();
-                for (const [index, forum] of Object.entries(forums)) {
-                    const forumElement = document.createElement('div');
-                    forumElement.className = 'form';
-                    forumElement.innerHTML = `
-                        <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${forum.username === '111222999owner' ? 'Owner' : forum.username}</div>
-                        <div>${forum.text}</div>
-                        ${currentUser === '111222999owner' ? `<button onclick="deleteForm('${index}')">Delete</button>` : ''}
-                        <div class="reply-container" data-form-index="${index}">
-                            <textarea placeholder="Enter your reply here..." name="reply-text"></textarea>
-                            <button onclick="submitReply(this)">Reply</button>
-                        </div>
-                        <div class="messages">
-                            ${forum.replies ? Object.values(forum.replies).map(reply => `
-                                <div class="message">
-                                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username === '111222999owner' ? 'Owner' : reply.username}</div>
-                                    <div>${reply.text}</div>
-                                </div>
-                            `).join('') : ''}
-                        </div>
-                    `;
-                    forumsContainer.appendChild(forumElement);
-                }
-            });
-        }
-
-        function loadRules() {
             const rulesContainer = document.getElementById('rules-content');
-            rulesContainer.innerHTML = '';
+            const ruleElement = document.createElement('div');
+            ruleElement.className = 'rule';
+            ruleElement.innerHTML = `
+                <div class="username">${currentUser}</div>
+                <div>${ruleText}</div>
+            `;
+            rulesContainer.appendChild(ruleElement);
 
-            firebase.database().ref(rulesKey).on('value', snapshot => {
-                const rules = snapshot.val();
-                for (const [index, rule] of Object.entries(rules)) {
-                    const ruleElement = document.createElement('div');
-                    ruleElement.className = 'rule';
-                    ruleElement.innerHTML = `
-                        <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${rule.username}</div>
-                        <div>${rule.text}</div>
-                        ${currentUser === '111222999owner' ? `<button onclick="deleteRule('${index}')">Delete</button>` : ''}
-                    `;
-                    rulesContainer.appendChild(ruleElement);
-                }
-            });
-        }
-
-        function deleteForm(index) {
-            if (currentUser !== '111222999owner') {
-                alert('Only the owner can delete forums.');
-                return;
-            }
-
-            firebase.database().ref(`${forumsKey}/${index}`).remove().then(() => {
-                loadForums();
-            }).catch(error => {
-                console.error('Error deleting form:', error);
-            });
-        }
-
-        function deleteRule(index) {
-            if (currentUser !== '111222999owner') {
-                alert('Only the owner can delete rules.');
-                return;
-            }
-
-            firebase.database().ref(`${rulesKey}/${index}`).remove().then(() => {
-                loadRules();
-            }).catch(error => {
-                console.error('Error deleting rule:', error);
-            });
+            ruleInput.value = '';
         }
 
         function loadUser() {
@@ -486,17 +358,18 @@
 
         function updateAuthUI() {
             const signInButton = document.getElementById('sign-in-button');
+            const signUpButton = document.getElementById('sign-up-button');
             const logoutButton = document.getElementById('logout-button');
             const rulesContainer = document.getElementById('rules-container');
 
             if (currentUser) {
                 signInButton.classList.add('hidden');
+                signUpButton.classList.add('hidden');
                 logoutButton.classList.remove('hidden');
-                if (currentUser === '111222999owner') {
-                    rulesContainer.classList.remove('hidden');
-                }
+                rulesContainer.classList.remove('hidden');
             } else {
                 signInButton.classList.remove('hidden');
+                signUpButton.classList.remove('hidden');
                 logoutButton.classList.add('hidden');
                 rulesContainer.classList.add('hidden');
             }
