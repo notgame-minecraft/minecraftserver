@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Serverqq</title>
+    <title>Minecraft Server</title>
     <!-- Firebase scripts -->
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
@@ -342,6 +342,7 @@
 
         function showSection(event, sectionId) {
             if (event) event.preventDefault(); // Prevent default anchor behavior
+            console.log(`Switching to section: ${sectionId}`); // Debug statement
             const sections = document.querySelectorAll('section');
             sections.forEach(section => {
                 section.classList.remove('active');
@@ -513,4 +514,4 @@
 
         function updateAuthUI() {
             const signInButton = document.getElementById('sign-in-button');
-            const logoutButton = document.getElementBy
+            const
