@@ -77,34 +77,17 @@
             margin-top: auto;
             color: #95a5a6;
         }
-        .rules-container {
+        .rules {
             margin: 20px 0;
             background: #333;
             padding: 10px;
             border-radius: 5px;
         }
-        .rules-container textarea {
-            width: 100%;
-            height: 100px;
+        .rule {
             margin-bottom: 10px;
-            background: #444;
-            color: #fff;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            box-sizing: border-box;
         }
-        .rules-container button {
-            padding: 10px 20px;
-            background: #e74c3c;
-            border: none;
-            color: #fff;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .rules-container button:hover {
-            background: #c0392b;
+        .rule .username {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -140,11 +123,7 @@
         </section>
         <section id="rules">
             <h2>Rules</h2>
-            <div class="rules-container" id="rules-container">
-                <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
-                <button id="add-rule-button" onclick="addRule()">Add Rule</button>
-            </div>
-            <div class="rules" id="rules-content">
+            <div class="rules">
                 <div class="rule">
                     <div class="username">Server Admin</div>
                     <div>No griefing.</div>
@@ -165,26 +144,6 @@
     </footer>
 
     <script>
-        function addRule() {
-            const ruleInput = document.getElementById('rule-input');
-            const ruleText = ruleInput.value.trim();
-            if (ruleText === '') {
-                alert('Please enter a rule.');
-                return;
-            }
-
-            const rulesContainer = document.getElementById('rules-content');
-            const ruleElement = document.createElement('div');
-            ruleElement.className = 'rule';
-            ruleElement.innerHTML = `
-                <div class="username">Server Admin</div>
-                <div>${ruleText}</div>
-            `;
-            rulesContainer.appendChild(ruleElement);
-
-            ruleInput.value = '';
-        }
-
         function showSection(event, sectionId) {
             if (event) event.preventDefault();
             const sections = document.querySelectorAll('section');
