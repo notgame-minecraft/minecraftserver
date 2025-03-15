@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Servereeeee</title>
+    <title>Minecraft Server</title>
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,6 +33,24 @@
             margin: 0;
             font-size: 3em;
             color: #e74c3c; /* Bright red color */
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            position: absolute;
+            right: 30px; /* Align buttons to the right */
+        }
+        .auth-buttons button {
+            padding: 10px 20px;
+            background: #2c3e50; /* Dark blue color */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .auth-buttons button:hover {
+            background: #e74c3c; /* Bright red color */
         }
         nav ul {
             list-style-type: none;
@@ -77,11 +99,118 @@
             margin-top: auto;
             color: #95a5a6; /* Light gray color */
         }
+        .form-container, .reply-container, .rules-container {
+            margin: 20px 0;
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .form-container textarea, .reply-container textarea, .rules-container textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            background: #444;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-container button, .reply-container button, .rules-container button {
+            padding: 10px 20px;
+            background: #e74c3c;
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .form-container button:hover, .reply-container button:hover, .rules-container button:hover {
+            background: #c0392b;
+        }
+        .messages, .forums, .rules {
+            margin-top: 20px;
+        }
+        .message, .form, .rule {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .message .username, .form .username, .rule .username {
+            font-weight: bold;
+        }
+        .message .profile-pic, .form .profile-pic, .rule .profile-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .hidden {
+            display: none;
+        }
+        #account-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        #account-modal-content {
+            background-color: #2c3e50;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: left;
+            color: #fff;
+            position: relative;
+        }
+        #account-modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #444;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        #account-modal-content button {
+            width: 100%;
+            padding: 10px;
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #account-modal-content button:hover {
+            background: #c0392b;
+        }
+        #close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.5em;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Welcome to the Minecraft Server</h1>
+        <div class="auth-buttons">
+            <button onclick="toggleAccountModal()">Account</button>
+        </div>
     </header>
     <nav>
         <ul>
@@ -112,18 +241,101 @@
         </section>
         <section id="forums">
             <h2>Forums</h2>
-            <p>Forum content will be here.</p>
+            <div class="form-container">
+                <textarea id="form-input" name="form-topic" placeholder="Enter your form topic here..."></textarea>
+                <button onclick="submitForm()">Create Form</button>
+            </div>
+            <div class="forums" id="forums-container">
+                <!-- Forums will be displayed here -->
+            </div>
         </section>
         <section id="rules">
             <h2>Rules</h2>
-            <p>Rules content will be here.</p>
+            <div class="rules-container hidden" id="rules-container">
+                <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
+                <button id="add-rule-button" onclick="submitRule()">Add Rule</button>
+            </div>
+            <div class="rules" id="rules-content">
+                <!-- Rules will be displayed here -->
+            </div>
         </section>
     </main>
     <footer>
         <p>&copy; 2025 Minecraft Server. All rights reserved.</p>
     </footer>
 
+    <div id="account-modal">
+        <div id="account-modal-content">
+            <span id="close-modal" onclick="toggleAccountModal()">&times;</span>
+            <h2>Account</h2>
+            <input type="text" id="username" placeholder="Enter your username">
+            <button id="sign-in-button" onclick="signIn()">Sign In</button>
+            <button id="logout-button" class="hidden" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- Firebase Initialization Script -->
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCuy34MiyRNtqiV1V95Y8lNhAzvUmi-hdY",
+            authDomain: "minecraftserverweb-64d67.firebaseapp.com",
+            databaseURL: "https://minecraftserverweb-64d67.firebaseio.com",
+            projectId: "minecraftserverweb-64d67",
+            storageBucket: "minecraftserverweb-64d67.firebasestorage.app",
+            messagingSenderId: "166026801133",
+            appId: "1:166026801133:web:2f1458c8af41cb88f941e4",
+            measurementId: "G-48MJK6VLEK"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.analytics();
+        const database = firebase.database();
+    </script>
+
+    <script>
+        let currentUser = null;
+        const forumsKey = 'forums';
+        const rulesKey = 'rules';
+        const currentUserKey = 'currentUser';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadForums();
+            loadRules();
+            loadUser();
+            updateAuthUI();
+            showSection(null, 'home'); // Show home section by default
+        });
+
+        function toggleAccountModal() {
+            const accountModal = document.getElementById('account-modal');
+            accountModal.style.display = accountModal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function signIn() {
+            const usernameInput = document.getElementById('username');
+            let username = usernameInput.value.trim();
+            if (username === '') {
+                alert('Please enter a username.');
+                return;
+            }
+
+            currentUser = username;
+            localStorage.setItem(currentUserKey, currentUser);
+
+            alert(`Signed in as ${currentUser}`);
+            updateAuthUI();
+            toggleAccountModal(); // Hide the account modal after signing in
+        }
+
+        function logout() {
+            localStorage.removeItem(currentUserKey);
+            currentUser = null;
+            updateAuthUI();
+            toggleAccountModal(); // Hide the account modal after logging out
+        }
+
         function showSection(event, sectionId) {
             if (event) event.preventDefault(); // Prevent default anchor behavior
             console.log(`Switching to section: ${sectionId}`); // Debug statement
@@ -133,6 +345,174 @@
             });
             document.getElementById(sectionId).classList.add('active');
         }
-    </script>
-</body>
-</html>
+
+        function submitForm() {
+            if (!currentUser) {
+                alert('Please sign in first.');
+                return;
+            }
+
+            const formInput = document.getElementById('form-input');
+            const formText = formInput.value.trim();
+            if (formText === '') {
+                alert('Please enter a form topic.');
+                return;
+            }
+
+            const newFormRef = firebase.database().ref(forumsKey).push();
+            newFormRef.set({
+                username: currentUser,
+                timestamp: new Date().toISOString(),
+                text: formText,
+                replies: []
+            }).then(() => {
+                formInput.value = '';
+                loadForums();
+            }).catch(error => {
+                console.error('Error submitting form:', error);
+            });
+        }
+
+        function submitReply(button) {
+            if (!currentUser) {
+                alert('Please sign in first.');
+                return;
+            }
+
+            const replyContainer = button.parentElement;
+            const replyInput = replyContainer.querySelector('textarea');
+            const replyText = replyInput.value.trim();
+            if (replyText === '') {
+                alert('Please enter a reply.');
+                return;
+            }
+
+            const formIndex = replyContainer.dataset.formIndex;
+            const formRef = firebase.database().ref(`${forumsKey}/${formIndex}/replies`).push();
+            formRef.set({
+                username: currentUser,
+                timestamp: new Date().toISOString(),
+                text: replyText
+            }).then(() => {
+                replyInput.value = '';
+                loadForums();
+            }).catch(error => {
+                console.error('Error submitting reply:', error);
+            });
+        }
+
+        function submitRule() {
+            if (currentUser !== '111222999owner') {
+                alert('Only the owner can add rules.');
+                return;
+            }
+
+            const ruleInput = document.getElementById('rule-input');
+            const ruleText = ruleInput.value.trim();
+            if (ruleText === '') {
+                alert('Please enter a rule.');
+                return;
+            }
+
+            const newRuleRef = firebase.database().ref(rulesKey).push();
+            newRuleRef.set({
+                username: 'Owner',
+                timestamp: new Date().toISOString(),
+                text: ruleText
+            }).then(() => {
+                ruleInput.value = '';
+                loadRules();
+            }).catch(error => {
+                console.error('Error submitting rule:', error);
+            });
+        }
+
+        function loadForums() {
+            const forumsContainer = document.getElementById('forums-container');
+            forumsContainer.innerHTML = '';
+
+            firebase.database().ref(forumsKey).on('value', snapshot => {
+                const forums = snapshot.val();
+                for (const [index, forum] of Object.entries(forums)) {
+                    const forumElement = document.createElement('div');
+                    forumElement.className = 'form';
+                    forumElement.innerHTML = `
+                        <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${forum.username === '111222999owner' ? 'Owner' : forum.username}</div>
+                        <div>${forum.text}</div>
+                        ${currentUser === '111222999owner' ? `<button onclick="deleteForm('${index}')">Delete</button>` : ''}
+                        <div class="reply-container" data-form-index="${index}">
+                            <textarea placeholder="Enter your reply here..." name="reply-text"></textarea>
+                            <button onclick="submitReply(this)">Reply</button>
+                        </div>
+                        <div class="messages">
+                            ${forum.replies ? Object.values(forum.replies).map(reply => `
+                                <div class="message">
+                                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username === '111222999owner' ? 'Owner' : reply.username}</div>
+                                    <div>${reply.text}</div>
+                                </div>
+                            `).join('') : ''}
+                        </div>
+                    `;
+                    forumsContainer.appendChild(forumElement);
+                }
+            });
+        }
+
+        function loadRules() {
+            const rulesContainer = document.getElementById('rules-content');
+            rulesContainer.innerHTML = '';
+
+            firebase.database().ref(rulesKey).on('value', snapshot => {
+                const rules = snapshot.val();
+                for (const [index, rule] of Object.entries(rules)) {
+                    const ruleElement = document.createElement('div');
+                    ruleElement.className = 'rule';
+                    ruleElement.innerHTML = `
+                        <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${rule.username}</div>
+                        <div>${rule.text}</div>
+                        ${currentUser === '111222999owner' ? `<button onclick="deleteRule('${index}')">Delete</button>` : ''}
+                    `;
+                    rulesContainer.appendChild(ruleElement);
+                }
+            });
+        }
+
+        function deleteForm(index) {
+            if (currentUser !== '111222999owner') {
+                alert('Only the owner can delete forums.');
+                return;
+            }
+
+            firebase.database().ref(`${forumsKey}/${index}`).remove().then(() => {
+                loadForums();
+            }).catch(error => {
+                console.error('Error deleting form:', error);
+            });
+        }
+
+        function deleteRule(index) {
+            if (currentUser !== '111222999owner') {
+                alert('Only the owner can delete rules.');
+                return;
+            }
+
+            firebase.database().ref(`${rulesKey}/${index}`).remove().then(() => {
+                loadRules();
+            }).catch(error => {
+                console.error('Error deleting rule:', error);
+            });
+        }
+
+        function loadUser() {
+            currentUser = localStorage.getItem(currentUserKey);
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const signInButton = document.getElementById('sign-in-button');
+            const logoutButton = document.getElementById('logout-button');
+            const rulesContainer = document.getElementById('rules-container');
+
+            if (currentUser) {
+                signInButton.classList.add('hidden');
+                logoutButton
