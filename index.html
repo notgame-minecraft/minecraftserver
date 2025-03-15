@@ -250,7 +250,7 @@
         </section>
         <section id="rules">
             <h2>Rules</h2>
-            <div class="rules-container hidden" id="rules-container">
+            <div class="rules-container">
                 <textarea id="rule-input" name="rule-topic" placeholder="Enter a rule..."></textarea>
                 <button onclick="submitRule()">Add Rule</button>
             </div>
@@ -325,8 +325,130 @@
             document.getElementById(sectionId).classList.add('active');
         }
 
+        function submitForm() {
+            if (!currentUser) {
+                alert('Please sign in first.');
+                return;
+            }
+
+            const formInput = document.getElementById('form-input');
+            const formText = formInput.value.trim();
+            if (formText === '') {
+                alert('Please enter a form topic.');
+                return;
+            }
+
+            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
+            forms.push({
+                username: currentUser,
+                timestamp: new Date().toISOString(),
+                text: formText,
+                replies: []
+            });
+            localStorage.setItem(formsKey, JSON.stringify(forms));
+
+            formInput.value = '';
+            loadForms();
+        }
+
+        function submitRule() {
+            if (currentUser !== 'owner') {
+                alert('Only the owner can add rules.');
+                return;
+            }
+
+            const ruleInput = document.getElementById('rule-input');
+            const ruleText = ruleInput.value.trim();
+            if (ruleText === '') {
+                alert('Please enter a rule.');
+                return;
+            }
+
+            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
+            rules.push({
+                username: currentUser,
+                timestamp: new Date().toISOString(),
+                text: ruleText
+            });
+            localStorage.setItem(rulesKey, JSON.stringify(rules));
+
+            ruleInput.value = '';
+            loadRules();
+        }
+
+        function loadForms() {
+            const formsContainer = document.getElementById('forms-container');
+            formsContainer.innerHTML = '';
+            const forms = JSON.parse(localStorage.getItem(formsKey)) || [];
+
+            forms.forEach((form, index) => {
+                const formElement = document.createElement('div');
+                formElement.className = 'form';
+                formElement.innerHTML = `
+                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${form.username}</div>
+                    <div>${form.text}</div>
+                    <div class="reply-container" data-form-index="${index}">
+                        <textarea placeholder="Enter your reply here..." name="reply-text"></textarea>
+                        <button onclick="submitReply(this)">Reply</button>
+                    </div>
+                    <div class="messages">
+                        ${form.replies.map(reply => `
+                            <div class="message">
+                                <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${reply.username}</div>
+                                <div>${reply.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                formsContainer.appendChild(formElement);
+            });
+
+            // Clean up old forms
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            const updatedForms = forms.filter(form => new Date(form.timestamp) > oneMonthAgo);
+            localStorage.setItem(formsKey, JSON.stringify(updatedForms));
+        }
+
+        function loadRules() {
+            const rulesContainer = document.getElementById('rules-content');
+            rulesContainer.innerHTML = '';
+            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
+
+            rules.forEach((rule, index) => {
+                const ruleElement = document.createElement('div');
+                ruleElement.className = 'rule';
+                ruleElement.innerHTML = `
+                    <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${rule.username}</div>
+                    <div>${rule.text}</div>
+                    ${currentUser === 'owner' ? `<button onclick="deleteRule(${index})">Delete</button>` : ''}
+                `;
+                rulesContainer.appendChild(ruleElement);
+            });
+
+            // Clean up old rules
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            const updatedRules = rules.filter(rule => new Date(rule.timestamp) > oneMonthAgo);
+            localStorage.setItem(rulesKey, JSON.stringify(updatedRules));
+        }
+
+        function deleteRule(index) {
+            if (currentUser !== 'owner') {
+                alert('Only the owner can delete rules.');
+                return;
+            }
+
+            const rules = JSON.parse(localStorage.getItem(rulesKey)) || [];
+            rules.splice(index, 1);
+            localStorage.setItem(rulesKey, JSON.stringify(rules));
+
+            loadRules();
+        }
+
         function loadUser() {
             currentUser = localStorage.getItem(currentUserKey);
+            updateAuthUI();
         }
 
         function updateAuthUI() {
@@ -334,14 +456,20 @@
             const logoutButton = document.getElementById('logout-button');
             const deleteButton = document.getElementById('delete-all-forms');
             const rulesContainer = document.getElementById('rules-container');
+            const ruleInput = document.getElementById('rule-input');
+            const addRuleButton = document.getElementById('add-rule-button');
 
             if (currentUser) {
                 signInButton.classList.add('hidden');
                 logoutButton.classList.remove('hidden');
                 if (currentUser === 'owner') {
+                    ruleInput.disabled = false;
+                    addRuleButton.disabled = false;
                     deleteButton.classList.remove('hidden');
                     rulesContainer.classList.remove('hidden');
                 } else {
+                    ruleInput.disabled = true;
+                    addRuleButton.disabled = true;
                     deleteButton.classList.add('hidden');
                     rulesContainer.classList.add('hidden');
                 }
@@ -350,6 +478,8 @@
                 logoutButton.classList.add('hidden');
                 deleteButton.classList.add('hidden');
                 rulesContainer.classList.add('hidden');
+                ruleInput.disabled = true;
+                addRuleButton.disabled = true;
             }
         }
 
