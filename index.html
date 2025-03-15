@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #1a1a1a; /* Background color */
+            background-color: #1a1a1a;
             color: #fff;
             text-align: center;
             min-height: 100vh;
@@ -22,13 +22,13 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
             display: flex;
-            justify-content: center; /* Center the header */
+            justify-content: center;
             align-items: center;
         }
         header h1 {
             margin: 0;
             font-size: 3em;
-            color: #e74c3c; /* Bright red color */
+            color: #e74c3c;
         }
         nav ul {
             list-style-type: none;
@@ -44,13 +44,13 @@
         nav ul li a {
             text-decoration: none;
             padding: 10px 20px;
-            background: #2c3e50; /* Dark blue color */
+            background: #2c3e50;
             color: #fff;
             border-radius: 5px;
             transition: background 0.3s, transform 0.3s;
         }
         nav ul li a:hover {
-            background: #e74c3c; /* Bright red color */
+            background: #e74c3c;
             transform: scale(1.1);
         }
         main {
@@ -75,7 +75,7 @@
             bottom: 0;
             width: 100%;
             margin-top: auto;
-            color: #95a5a6; /* Light gray color */
+            color: #95a5a6;
         }
     </style>
 </head>
@@ -125,8 +125,7 @@
 
     <script>
         function showSection(event, sectionId) {
-            if (event) event.preventDefault(); // Prevent default anchor behavior
-            console.log(`Switching to section: ${sectionId}`); // Debug statement
+            if (event) event.preventDefault();
             const sections = document.querySelectorAll('section');
             sections.forEach(section => {
                 section.classList.remove('active');
