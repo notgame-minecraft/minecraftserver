@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Servereeee</title>
+    <title>Minecraft Server</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -251,6 +251,9 @@
     </div>
 
     <!-- Firebase Initialization Script -->
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js"></script>
     <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -268,9 +271,7 @@
         const app = firebase.initializeApp(firebaseConfig);
         const analytics = firebase.analytics();
         const database = firebase.database();
-    </script>
 
-    <script>
         let currentUser = null;
         const forumsKey = 'forums';
         const rulesKey = 'rules';
@@ -281,7 +282,7 @@
             loadRules();
             loadUser();
             updateAuthUI();
-            showSection(null, 'home'); // Show home section by default
+            showSection(null, 'home');
         });
 
         function toggleAccountModal() {
@@ -302,14 +303,14 @@
 
             alert(`Signed in as ${currentUser}`);
             updateAuthUI();
-            toggleAccountModal(); // Hide the account modal after signing in
+            toggleAccountModal();
         }
 
         function logout() {
             localStorage.removeItem(currentUserKey);
             currentUser = null;
             updateAuthUI();
-            toggleAccountModal(); // Hide the account modal after logging out
+            toggleAccountModal();
         }
 
         function showSection(event, sectionId) {
