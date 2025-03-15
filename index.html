@@ -156,7 +156,7 @@
             <li><a href="#updates">Updates</a></li>
             <li><a href="#staff">Staff</a></li>
             <li><a href="#forms">Forms</a></li>
-            <li><a href="#sign-in">Sign In!</a></li>
+            <li><a href="#sign-in">Sign In</a></li>
         </ul>
     </nav>
     <main>
@@ -179,16 +179,17 @@
         <section id="forms">
             <h2>Forms</h2>
             <div class="form-container">
-                <textarea id="form-input" placeholder="Enter your form topic here..."></textarea>
+                <textarea id="form-input" name="form-topic" placeholder="Enter your form topic here..."></textarea>
                 <button onclick="submitForm()">Create Form</button>
             </div>
             <div class="forms" id="forms-container">
                 <!-- Forms will be displayed here -->
             </div>
+            <button onclick="deleteAllForms()">Delete All Forms</button>
         </section>
         <section id="sign-in">
             <h2>Sign In</h2>
-            <input type="text" id="username" placeholder="Enter your username">
+            <input type="text" id="username" name="username" placeholder="Enter your username">
             <button onclick="signIn()">Sign In</button>
         </section>
     </main>
@@ -287,7 +288,7 @@
                     <div class="username"><img src="https://via.placeholder.com/30" class="profile-pic"> ${form.username}</div>
                     <div>${form.text}</div>
                     <div class="reply-container" data-form-index="${index}">
-                        <textarea placeholder="Enter your reply here..."></textarea>
+                        <textarea placeholder="Enter your reply here..." name="reply-text"></textarea>
                         <button onclick="submitReply(this)">Reply</button>
                     </div>
                     <div class="messages">
@@ -331,6 +332,12 @@
                 currentUser = null;
                 document.getElementById('sign-in').classList.remove('hidden');
             }
+        }
+
+        function deleteAllForms() {
+            localStorage.removeItem(formsKey);
+            alert('All forms have been deleted.');
+            location.reload(); // Reload the page to reflect changes
         }
     </script>
 </body>
