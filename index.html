@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Serverg</title>
+    <title>Minecraft Server</title>
     <!-- Firebase scripts -->
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
@@ -218,12 +218,12 @@
     </header>
     <nav>
         <ul>
-            <li><a href="#home" onclick="showSection('home')">Home</a></li>
-            <li><a href="#about" onclick="showSection('about')">About</a></li>
-            <li><a href="#updates" onclick="showSection('updates')">Updates</a></li>
-            <li><a href="#staff" onclick="showSection('staff')">Staff</a></li>
-            <li><a href="#forums" onclick="showSection('forums')">Forums</a></li>
-            <li><a href="#rules" onclick="showSection('rules')">Rules</a></li>
+            <li><a href="#home" onclick="showSection(event, 'home')">Home</a></li>
+            <li><a href="#about" onclick="showSection(event, 'about')">About</a></li>
+            <li><a href="#updates" onclick="showSection(event, 'updates')">Updates</a></li>
+            <li><a href="#staff" onclick="showSection(event, 'staff')">Staff</a></li>
+            <li><a href="#forums" onclick="showSection(event, 'forums')">Forums</a></li>
+            <li><a href="#rules" onclick="showSection(event, 'rules')">Rules</a></li>
         </ul>
     </nav>
     <main>
@@ -309,7 +309,7 @@
             loadRules();
             loadUser();
             updateAuthUI();
-            showSection('home'); // Show home section by default
+            showSection(null, 'home'); // Show home section by default
         });
 
         function toggleAccountModal() {
@@ -340,7 +340,8 @@
             toggleAccountModal(); // Hide the account modal after logging out
         }
 
-        function showSection(sectionId) {
+        function showSection(event, sectionId) {
+            if (event) event.preventDefault(); // Prevent default anchor behavior
             const sections = document.querySelectorAll('section');
             sections.forEach(section => {
                 section.classList.remove('active');
@@ -512,8 +513,4 @@
 
         function updateAuthUI() {
             const signInButton = document.getElementById('sign-in-button');
-            const logoutButton = document.getElementById('logout-button');
-            const rulesContainer = document.getElementById('rules-container');
-
-            if (currentUser) {
-                signInButton.class
+            const logoutButton = document.getElementById('
