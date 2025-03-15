@@ -163,7 +163,7 @@
             <li><a href="#updates" onclick="showSection('updates')">Updates</a></li>
             <li><a href="#staff" onclick="showSection('staff')">Staff</a></li>
             <li><a href="#forms" onclick="showSection('forms')">Forms</a></li>
-            <li><a href="#rules" onclick="showSection('rules')">Rules!</a></li>
+            <li><a href="#rules" onclick="showSection('rules')">Rules</a></li>
         </ul>
     </nav>
     <main>
@@ -438,6 +438,10 @@
 
             // Restore current user from localStorage
             currentUser = localStorage.getItem(currentUserKey);
+            if (currentUser === 'owner' && !users['owner']) {
+                currentUser = null;
+                localStorage.removeItem(currentUserKey);
+            }
             updateAuthUI();
         }
 
