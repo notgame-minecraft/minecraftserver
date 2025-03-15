@@ -76,26 +76,8 @@
         main {
             flex: 1;
         }
-        section {
+        .hidden {
             display: none;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            margin: 20px auto;
-            width: 80%;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        section:target {
-            display: block;
-        }
-        footer {
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            position: relative;
-            bottom: 0;
-            width: 100%;
-            margin-top: auto;
-            color: #95a5a6; /* Light gray color */
         }
         .form-container, .reply-container, .rules-container {
             margin: 20px 0;
@@ -146,16 +128,13 @@
             margin-right: 10px;
             vertical-align: middle;
         }
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
     <header>
         <h1>Welcome to the Minecraft Server</h1>
         <div class="auth-buttons">
-            <button id="sign-in-button" onclick="toggleSignIn()">Sign In</button>
+            <button id="sign-in-toggle" onclick="toggleSignInForm()">Sign In</button>
             <button id="logout-button" class="hidden" onclick="logout()">Logout</button>
         </div>
     </header>
@@ -205,10 +184,9 @@
             </div>
             <div class="rules" id="rules-content">
                 <!-- Rules will be displayed here -->
-                1. No cheating/hacking
             </div>
         </section>
-        <section id="sign-in">
+        <section id="sign-in-form" class="hidden">
             <h2>Sign In</h2>
             <input type="text" id="username" name="username" placeholder="Enter your username">
             <button onclick="signIn()">Sign In</button>
@@ -231,9 +209,9 @@
             updateAuthUI();
         });
 
-        function toggleSignIn() {
-            const signInSection = document.getElementById('sign-in');
-            signInSection.classList.remove('hidden'); // Ensure the sign-in section is visible
+        function toggleSignInForm() {
+            const signInForm = document.getElementById('sign-in-form');
+            signInForm.classList.toggle('hidden');
         }
 
         function signIn() {
@@ -257,6 +235,7 @@
 
             alert(`Signed in as ${currentUser}`);
             updateAuthUI();
+            toggleSignInForm(); // Hide the sign-in form after signing in
         }
 
         function logout() {
@@ -432,16 +411,16 @@
         }
 
         function updateAuthUI() {
-            const signInButton = document.getElementById('sign-in-button');
+            const signInToggle = document.getElementById('sign-in-toggle');
             const logoutButton = document.getElementById('logout-button');
-            const signInSection = document.getElementById('sign-in');
+            const signInForm = document.getElementById('sign-in-form');
             const deleteButton = document.getElementById('delete-all-forms');
             const rulesContainer = document.getElementById('rules-container');
 
             if (currentUser) {
-                signInButton.classList.add('hidden');
+                signInToggle.classList.add('hidden');
                 logoutButton.classList.remove('hidden');
-                signInSection.classList.add('hidden');
+                signInForm.classList.add('hidden');
                 if (currentUser === 'owner') {
                     deleteButton.classList.remove('hidden');
                     rulesContainer.classList.remove('hidden');
@@ -450,9 +429,9 @@
                     rulesContainer.classList.add('hidden');
                 }
             } else {
-                signInButton.classList.remove('hidden');
+                signInToggle.classList.remove('hidden');
                 logoutButton.classList.add('hidden');
-                signInSection.classList.remove('hidden');
+                signInForm.classList.add('hidden');
                 deleteButton.classList.add('hidden');
                 rulesContainer.classList.add('hidden');
             }
