@@ -361,7 +361,7 @@
 
         function toggleDeleteAllFormsButton() {
             const deleteButton = document.getElementById('delete-all-forms');
-            if (currentUser === 'admin') {
+            if (currentUser === 'owner') {
                 deleteButton.classList.remove('hidden');
             } else {
                 deleteButton.classList.add('hidden');
