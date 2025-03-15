@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-image: url('images/minecra.jpg'); /* Ensure this path is correct */
+            background-image: url('images/minecraft.jpg'); /* Ensure this path is correct */
             background-size: cover; /* Cover the entire background */
             background-repeat: no-repeat; /* Prevent the image from repeating */
             background-position: center; /* Center the image */
@@ -432,19 +432,20 @@
 
             // Restore current user from localStorage
             currentUser = localStorage.getItem(currentUserKey);
-
             updateAuthUI();
         }
 
         function updateAuthUI() {
             const signInButton = document.getElementById('sign-in-button');
             const logoutButton = document.getElementById('logout-button');
+            const signInSection = document.getElementById('sign-in');
             const deleteButton = document.getElementById('delete-all-forms');
             const rulesContainer = document.getElementById('rules-container');
 
             if (currentUser) {
                 signInButton.classList.add('hidden');
                 logoutButton.classList.remove('hidden');
+                signInSection.classList.add('hidden');
                 if (currentUser === 'owner') {
                     deleteButton.classList.remove('hidden');
                     rulesContainer.classList.remove('hidden');
