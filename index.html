@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server!</title>
+    <title>Minecraft Server</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -172,7 +172,7 @@
     <main>
         <section id="home">
             <h2>Home</h2>
-            <p>Welcome to our Minecraft server. Enjoy your stay!!</p>
+            <p>Welcome to our Minecraft server. Enjoy your stay!</p>
         </section>
         <section id="about">
             <h2>About</h2>
@@ -207,7 +207,7 @@
                 <!-- Rules will be displayed here -->
             </div>
         </section>
-        <section id="sign-in" class="hidden">
+        <section id="sign-in">
             <h2>Sign In</h2>
             <input type="text" id="username" name="username" placeholder="Enter your username">
             <button onclick="signIn()">Sign In</button>
@@ -232,7 +232,7 @@
 
         function toggleSignIn() {
             const signInSection = document.getElementById('sign-in');
-            signInSection.classList.toggle('hidden');
+            signInSection.classList.remove('hidden'); // Ensure the sign-in section is visible
         }
 
         function signIn() {
@@ -256,7 +256,6 @@
 
             alert(`Signed in as ${currentUser}`);
             updateAuthUI();
-            toggleSignIn();
         }
 
         function logout() {
