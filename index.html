@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Serverr</title>
+    <title>Minecraft Server</title>
     <!-- Firebase scripts -->
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js"></script>
@@ -515,4 +515,7 @@
 
             if (currentUser) {
                 signInButton.classList.add('hidden');
-                logoutButton
+                logoutButton.classList.remove('hidden');
+                if (currentUser === '111222999owner') {
+                    rulesContainer.classList.remove('hidden');
+               
