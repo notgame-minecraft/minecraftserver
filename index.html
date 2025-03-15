@@ -14,6 +14,9 @@
             background-position: center;
             color: #fff;
             text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         header {
             padding: 20px;
@@ -27,10 +30,11 @@
         nav ul {
             list-style-type: none;
             padding: 0;
+            margin: 0;
         }
         nav ul li {
             display: inline;
-            margin-right: 10px;
+            margin: 0 10px;
         }
         nav ul li a {
             text-decoration: none;
@@ -42,6 +46,9 @@
         }
         nav ul li a:hover {
             background: rgba(0, 0, 0, 0.9);
+        }
+        main {
+            flex: 1;
         }
         section {
             display: none;
@@ -55,17 +62,18 @@
             display: block;
         }
         footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
             padding: 10px;
             background: rgba(0, 0, 0, 0.5);
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            margin-top: auto;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Welcome to the Minecraft Server!!</h1>
+        <h1>Welcome to the Minecraft Server</h1>
     </header>
     <nav>
         <ul>
@@ -78,22 +86,19 @@
     <main>
         <section id="home">
             <h2>Home</h2>
-            <p>Welcome to our Minecraft server. Enjoy your stay!!</p>
+            <p>Welcome to our Minecraft server. Enjoy your stay!</p>
         </section>
         <section id="about">
             <h2>About</h2>
-            <p>I made this server so all of you players can play a server and have fun.</p>
+            <p>Learn more about our server and community.</p>
         </section>
         <section id="updates">
             <h2>Updates</h2>
             <p>Here are the latest updates and news.</p>
-            <p>Server is up!!!.</p>
         </section>
         <section id="staff">
             <h2>Staff</h2>
             <p>Meet our dedicated staff members.</p>
-            <p>---------------------------------</p>
-            <p>Owner: Not_game80</p>
         </section>
     </main>
     <footer>
